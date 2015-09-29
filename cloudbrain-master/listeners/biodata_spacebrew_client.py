@@ -217,6 +217,9 @@ class ecg_fake():
     def get_hrv_t(self):
         return random.random()
 
+    def get_rri(self):
+        return random.random()
+
 class ecg_real(object):
 
 
