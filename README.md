@@ -5,7 +5,7 @@ Visualization tool for arbitrary timeseries data routed via Spacebrew and visual
 
 <h2>Installation</h2>
 
-You need Spacebrew, node (probably </b>v0.11.0<b>), and python installed for this to work. Also need the following packages in node.js: 
+You need Spacebrew, node (probably <b>v0.11.0</b>), and python installed for this to work. Also need the following packages in node.js: 
 
 ```
 npm install ws
@@ -23,7 +23,7 @@ Run
 ```
 ./run.sh
 ```
-from the main directory. And then open up the file <b>./Live Visualization/biodata_visualization.html. </b> Data is currently streaming to the page with the breathing pulse visulazation.
+from the main directory. And then open up the file ```./Live Visualization/biodata_visualization.html```.  Data is currently streaming to the page with the breathing pulse visulazation.
 
 <h2>Manually</h2>
 
