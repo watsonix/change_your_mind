@@ -23,7 +23,7 @@ Run
 ```
 ./run.sh
 ```
-from the main directory. And then open up the file <b>./Live Visualization/biodata_visualization.html</b>. Data is currently streaming to the page with the breathing pulse visulazation.
+from the main directory. And then open up the file <b>./Live Visualization/biodata_visualization.html. </b> Data is currently streaming to the page with the breathing pulse visulazation.
 
 <h2>Manually</h2>
 
