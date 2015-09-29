@@ -1,6 +1,4 @@
 import argparse
-import math
-import time
 
 from pythonosc import dispatcher
 from pythonosc import osc_server
@@ -20,7 +18,7 @@ class MuseConnect:
     def __init__(self, ipAddress="127.0.0.1", port=5000):
 
         self.oscDispatcher = dispatcher.Dispatcher()
-        #oscDispatcher.map("/debug", print)
+        # oscDispatcher.map("/debug", print)
         self.oscDispatcher.map("/muse/batt", self.battery_handler, "battery")
         self.oscDispatcher.map("/muse/elements/touching_forehead", self.touchingforehead_handler, "touchingforehead")
         self.oscDispatcher.map("/muse/elements/horseshoe", self.horseshoe_handler, "horseshoe")
@@ -51,13 +49,11 @@ class MuseConnect:
         self.beta_absolute = None
         self.gamma_absolute = None
 
-        self.oscServer = osc_server.ThreadingOSCUDPServer(
-        (ipAddress, args.port), self.oscDispatcher)
+        self.oscServer = osc_server.ThreadingOSCUDPServer((ipAddress, args.port), self.oscDispatcher)
         print("Serving OSC on {}".format(self.oscServer.server_address))
 
-
     def battery_handler(self, address, name, chargePercent, fuelgaugeBattVolt, ADCBattVolt, temperature):
-        """ 
+        """
         gets battery data from Muse, with:
         chargePercent = %/100, range (0-10000)
         fuelgaugeBattVolt = mV, 3000-4200 mV
@@ -69,8 +65,7 @@ class MuseConnect:
         print("battery: {}".format(chargePercent / 100.))
         self.battery = chargePercent / 100.  # return percent charge in floating point
 
-
-    def touchingforehead_handler(self, address, name, touchingforehead): #unused_addr, touchingforehead, timestamp, timestampMS):
+    def touchingforehead_handler(self, address, name, touchingforehead):
         """
         returns value 1 if touching forehead, 0 if not
         updated at 10 Hz
@@ -78,20 +73,19 @@ class MuseConnect:
         print("touchingforehead: {}".format(touchingforehead))
         self.touchingforehead = touchingforehead
 
-
     def horseshoe_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
         status indicator for each of the Muse channels
         1 = good, 2 = ok, >=3 bad
         """
-        horseshoe = [ch1, ch2, ch3, ch4] 
+        horseshoe = [ch1, ch2, ch3, ch4]
         print("horseshoe: {}".format(horseshoe))
         self.horseshoe = horseshoe
 
     def eeg_delta_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontDelta = (ch2 + ch3) / 2
         print("delta: {}".format(frontDelta))
-        self.delta_absolute =  frontDelta
+        self.delta_absolute = frontDelta
 
     def eeg_theta_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontTheta = (ch2 + ch3) / 2
@@ -112,7 +106,6 @@ class MuseConnect:
         frontGamma = (ch2 + ch3) / 2
         print("gamma: {}".format(frontGamma))
         self.gamma_absolute = frontGamma
-
 
     def eeg_delta_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontDelta = (ch2 + ch3) / 2
@@ -139,14 +132,11 @@ class MuseConnect:
         print("gamma_relative: {}".format(frontGamma))
         self.gamma_relative = frontGamma
 
-
-
     def run(self):
         """
         start the osc server & message handler
         """
         self.oscServer.serve_forever()
-
 
     def shutdown(self):
         """
@@ -156,9 +146,8 @@ class MuseConnect:
         self.oscServer.shutdown()
 
 
-
 if __name__ == "__main__":
-    #import matplotlib.pyplot as plt  # used for live plot updates 
+    # import matplotlib.pyplot as plt  # used for live plot updates
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip",
