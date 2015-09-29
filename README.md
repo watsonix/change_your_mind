@@ -5,7 +5,7 @@ Visualization tool for arbitrary timeseries data routed via Spacebrew and visual
 
 <h2>Installation</h2>
 
-You need Spacebrew, node, and python installed for this to work. Also need the following packages in node.js: 
+You need Spacebrew, node (probably </b>v0.11.0<b>), and python installed for this to work. Also need the following packages in node.js: 
 
 ```
 npm install ws
@@ -41,6 +41,9 @@ Once these are up, do
 python biodata_spacebrew_client.py
 ```
 from the listeners directory in cloudbrew, and FINALLY, open up the biodata_visualization.html file in Live Visualization to start grabbing & plotting data! 
+
+<h2>Troubleshooting</h2>
+If having trouble getting data through to vis, consider deleting or modifying /Spacebrew-spacebrew-672a874/data/routes/live/live_persist_config.json
 
 <h2>Debugging</h2>
 
