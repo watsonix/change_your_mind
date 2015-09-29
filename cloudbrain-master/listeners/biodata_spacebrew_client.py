@@ -13,20 +13,20 @@ from websocket import create_connection
 import threading
 from math import *
 import webbrowser
-from state_control import ChangeYourBrainStateControl
+from state_control.state_control import ChangeYourBrainStateControl
 from subprocess import call
-from neurosky_ecg import NeuroskyECG
+from ecg.neurosky_ecg import NeuroskyECG
 import sys
 import serial
 
-eeg_source = "real" #fake or real
-# eeg_source = "fake" #fake or real
+# eeg_source = "real" #fake or real
+eeg_source = "fake" #fake or real
 
-ecg_source = "real" #fake or real
-# ecg_source = "fake" #fake or real
+# ecg_source = "real" #fake or real
+ecg_source = "fake" #fake or real
 
-timing = "live" #for full timing as in exploratorium visitor mode
-# timing = "debug" #for quick debug timing
+# timing = "live" #for full timing as in exploratorium visitor mode
+timing = "debug" #for quick debug timing
 
 if eeg_source == "real":
     serverName = "server.neuron.brain"
@@ -152,6 +152,7 @@ class SpacebrewServer(object):
         ]
 
         self.ws = create_connection("ws://%s:%s" % (self.server, self.port))
+        print(self.ws)
 
         if(port==9000): #if this is the main server instance
 
