@@ -43,7 +43,7 @@ python biodata_spacebrew_client.py
 from the listeners directory in cloudbrew, and FINALLY, open up the biodata_visualization.html file in Live Visualization to start grabbing & plotting data! 
 
 <h2>Troubleshooting</h2>
-If having trouble getting data through to vis, consider deleting or modifying /Spacebrew-spacebrew-672a874/data/routes/live/live_persist_config.json
+If having trouble getting data through to vis, consider deleting or modifying ```/Spacebrew-spacebrew-672a874/data/routes/live/live_persist_config.json```
 
 <h2>Debugging</h2>
 
