@@ -16,7 +16,7 @@ if sys.platform == 'win32': #windoze
 class ChangeYourBrainStateControl( object ):
 
     def __init__(self,client_name, sb_server, ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 10, condition_inst_sec = 20):
-        self.client_name = client_name
+        self.client_name = client_name# "blah" #client_name #*** MODIFIED! ***
         self.sb_server = sb_server
         self.ecg = ecg
         self.set_state(NO_EXPERIMENT)
@@ -47,6 +47,7 @@ class ChangeYourBrainStateControl( object ):
 
     ### CALLED VIA SPACEBREW CLIENT LISTENER ############
     def process_eeg_alpha(self,value):
+        #TODO: modify to actually just pass numbers!
         arrValue = value.split(',')
         self.alpha_buffer.append(arrValue)
         # print('process_eeg_alpha called')
