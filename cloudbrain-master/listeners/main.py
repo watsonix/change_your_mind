@@ -64,7 +64,7 @@ class eeg_fake():
         while 1:
             time_stamp+=1
             time.sleep(0.1)
-            value = "%s,%s,%s,%s,%s,%s" % (random.random(),random.random(),random.random(),random.random(), time_stamp, time_stamp)
+            value = "{},{},{},{},{},{}".format(random.random(),random.random(),random.random(),random.random(), time_stamp, time_stamp)
             self.sc.process_eeg_alpha(value)
 
 # FAKE HEART
