@@ -11,4 +11,4 @@ start "" "C:\Program Files (x86)\Windows Media Player\wmplayer.exe" "C:\Users\Ex
 start "" "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --kiosk
 timeout /t 1 /nobreak
 cd ..
-start python ./cloudbrain-master/listeners/biodata_spacebrew_client.py 
+start python ./cloudbrain-master/listeners/main.py 

@@ -8,4 +8,4 @@ sleep 1
 node node_server_forever.js -p 9002 &
 sleep 1
 cd ..
-python ./cloudbrain-master/listeners/biodata_spacebrew_client.py 
+python ./cloudbrain-master/listeners/main.py 
