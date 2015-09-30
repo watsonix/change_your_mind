@@ -56,7 +56,7 @@ class ChangeYourBrainStateControl( object ):
     def tag_in(self,muse_id='0000'):
         #devNote: put here possible confirmation of user change if in middle of experiment
         self.tag_time = time.time()
-        print('tagged in at',self.tag_time)
+        print('tagged in at', self.tag_time)
         self.alpha_save_condition = {'time': [], 'value':[], 'all': []}
         self.hrv_save_condition = {'time': [], 'value': [], 'rri': [], 'device_time': []}
 
@@ -71,7 +71,7 @@ class ChangeYourBrainStateControl( object ):
     ### STATE CHANGING ############
     def set_state(self,state):
         self.experiment_state = state
-        print(time.time(),state)
+        print(time.time(), state)
 
     def start_setup_instructions(self):
         #devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
@@ -133,7 +133,7 @@ class ChangeYourBrainStateControl( object ):
             self.baseline_subj.append(self.poll_answer)
             self.poll_answer = False
 
-        print('baseline user answers: ',self.baseline_subj)
+        print('baseline user answers: ', self.baseline_subj)
         self.start_condition_instructions()
 
     def start_condition_instructions(self):
@@ -265,8 +265,8 @@ class ChangeYourBrainStateControl( object ):
             print('baseline: alpha_buffer empty!')
         self.alpha_buffer = []
 
-        # print "hrv type:",type(self.ecg.get_hrv())
-        # print "hrv:",self.ecg.get_hrv()
+        # print("hrv type:",type(self.ecg.get_hrv()))
+        # print("hrv:",self.ecg.get_hrv())
         self.hrv_save_baseline['time'].append(time.time())
         self.hrv_save_baseline['value'].append(self.ecg.get_hrv())
         self.hrv_save_baseline['device_time'].append(self.ecg.get_hrv_t())
@@ -276,7 +276,7 @@ class ChangeYourBrainStateControl( object ):
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
-        # print "output baseline: {}".format(value_out) #^^^
+        # print("output baseline: {}".format(value_out)) #^^^
 
     def output_condition(self):
         """output aggregated EEG and HRV values"""
@@ -300,7 +300,7 @@ class ChangeYourBrainStateControl( object ):
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
-        # print "output condition: {}".format(value_out) #^^^
+        # print("output condition: {}".format(value_out)) #^^^
 
     def output_post_experiment(self):
 
@@ -338,9 +338,9 @@ class ChangeYourBrainStateControl( object ):
             'alpha baseline': self.alpha_save_baseline,
             'alpha condition': self.alpha_save_condition,
         }
-        pickle.dump( output_dict, open( filename, "wb" ) )
+        pickle.dump( output_dict, open(filename, "wb" ) )
 
-        print("output post experiment",value_out) 
+        print("output post experiment", value_out) 
 
     ######################################################
     ### HELPER ###########################################
@@ -492,7 +492,7 @@ class WindowsKeyboardInput ( threading.Thread ):
         pythoncom.PumpMessages()
 
     def OnKeyboardEvent(self,event):
-        #print 'Key:', event.Key
+        # print('Key:', event.Key)
         print('KeyID:', event.KeyID)
         self.state_control.win_keyboard_input(event.KeyID)
 
@@ -500,16 +500,16 @@ class WindowsKeyboardInput ( threading.Thread ):
         return True
 
 
-class FakeKeyboardInput ( threading.Thread ):
+class FakeKeyboardInput(threading.Thread):
     
     def __init__(self, sc_instance):
         super(FakeKeyboardInput, self).__init__()
         self.state_control = sc_instance
 
-    def stop ( self ):
+    def stop( self ):
         pass
 
-    def run ( self ):
+    def run( self ):
         while True: #send 1,2,3 in a loop
             if random.random() < .5:
                 self.state_control.win_keyboard_input(96)
