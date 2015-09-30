@@ -1,5 +1,5 @@
 import time
-from state_control import ChangeYourBrainStateControl
+from .state_control import ChangeYourBrainStateControl
 #import pycurl
 
 class ecg_fake():
@@ -10,10 +10,10 @@ class ecg_fake():
 	def is_lead_on(self):
 		self.lead_count += 1
 		if self.lead_count > 5:
-			print 'lead on'
+			print('lead on')
 			return True
 		else:
-			print 'lead off'
+			print('lead off')
 			return False
 
 	def get_hrv(self):
@@ -34,7 +34,7 @@ class ecg_real(object):
 		try:
 		    self.nskECG = NeuroskyECG(target_port)
 		except serial.serialutil.SerialException:
-		    print "Could not open target serial port: %s" % target_port
+		    print("Could not open target serial port: %s" % target_port)
 		    sys.exit(1)
 
 		#optional call, default is already 1

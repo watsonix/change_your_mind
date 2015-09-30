@@ -1,4 +1,6 @@
 import argparse
+import math
+import time
 
 from pythonosc import dispatcher
 from pythonosc import osc_server
@@ -18,7 +20,7 @@ class MuseConnect:
     def __init__(self, ipAddress="127.0.0.1", port=5000):
 
         self.oscDispatcher = dispatcher.Dispatcher()
-        # oscDispatcher.map("/debug", print)
+        #oscDispatcher.map("/debug", print)
         self.oscDispatcher.map("/muse/batt", self.battery_handler, "battery")
         self.oscDispatcher.map("/muse/elements/touching_forehead", self.touchingforehead_handler, "touchingforehead")
         self.oscDispatcher.map("/muse/elements/horseshoe", self.horseshoe_handler, "horseshoe")
@@ -49,11 +51,13 @@ class MuseConnect:
         self.beta_absolute = None
         self.gamma_absolute = None
 
-        self.oscServer = osc_server.ThreadingOSCUDPServer((ipAddress, args.port), self.oscDispatcher)
-        print("Serving OSC on {}".format(self.oscServer.server_address))
+        self.oscServer = osc_server.ThreadingOSCUDPServer(
+        (ipAddress, args.port), self.oscDispatcher)
+        print(("Serving OSC on {}".format(self.oscServer.server_address)))
+
 
     def battery_handler(self, address, name, chargePercent, fuelgaugeBattVolt, ADCBattVolt, temperature):
-        """
+        """ 
         gets battery data from Muse, with:
         chargePercent = %/100, range (0-10000)
         fuelgaugeBattVolt = mV, 3000-4200 mV
@@ -62,81 +66,87 @@ class MuseConnect:
         updates at 0.1 Hz
         """
         # print("battery:", names, ":", chargePercent, fuelgaugeBattVolt, ADCBattVolt,temperature)
-        print("battery: {}".format(chargePercent / 100.))
+        print(("battery: {}".format(chargePercent / 100.)))
         self.battery = chargePercent / 100.  # return percent charge in floating point
 
-    def touchingforehead_handler(self, address, name, touchingforehead):
+
+    def touchingforehead_handler(self, address, name, touchingforehead): #unused_addr, touchingforehead, timestamp, timestampMS):
         """
         returns value 1 if touching forehead, 0 if not
         updated at 10 Hz
         """
-        print("touchingforehead: {}".format(touchingforehead))
+        print(("touchingforehead: {}".format(touchingforehead)))
         self.touchingforehead = touchingforehead
+
 
     def horseshoe_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
         status indicator for each of the Muse channels
         1 = good, 2 = ok, >=3 bad
         """
-        horseshoe = [ch1, ch2, ch3, ch4]
-        print("horseshoe: {}".format(horseshoe))
+        horseshoe = [ch1, ch2, ch3, ch4] 
+        print(("horseshoe: {}".format(horseshoe)))
         self.horseshoe = horseshoe
 
     def eeg_delta_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontDelta = (ch2 + ch3) / 2
-        print("delta: {}".format(frontDelta))
-        self.delta_absolute = frontDelta
+        print(("delta: {}".format(frontDelta)))
+        self.delta_absolute =  frontDelta
 
     def eeg_theta_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontTheta = (ch2 + ch3) / 2
-        print("theta: {}".format(frontTheta))
+        print(("theta: {}".format(frontTheta)))
         self.theta_absolute = frontTheta
 
     def eeg_alpha_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontAlpha = (ch2 + ch3) / 2
-        print("alpha: {}".format(frontAlpha))
+        print(("alpha: {}".format(frontAlpha)))
         self.alpha_absolute = frontAlpha
 
     def eeg_beta_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontBeta = (ch2 + ch3) / 2
-        print("beta: {}".format(frontBeta))
+        print(("beta: {}".format(frontBeta)))
         self.beta_absolute = frontBeta
 
     def eeg_gamma_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontGamma = (ch2 + ch3) / 2
-        print("gamma: {}".format(frontGamma))
+        print(("gamma: {}".format(frontGamma)))
         self.gamma_absolute = frontGamma
+
 
     def eeg_delta_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontDelta = (ch2 + ch3) / 2
-        print("delta_relative: {}".format(frontDelta))
+        print(("delta_relative: {}".format(frontDelta)))
         self.delta_relative = frontDelta
 
     def eeg_theta_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontTheta = (ch2 + ch3) / 2
-        print("theta_relative: {}".format(frontTheta))
+        print(("theta_relative: {}".format(frontTheta)))
         self.theta_relative = frontTheta
 
     def eeg_alpha_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontAlpha = (ch2 + ch3) / 2
-        print("alpha_relative: {}".format(frontAlpha))
+        print(("alpha_relative: {}".format(frontAlpha)))
         self.alpha_relative = frontAlpha
 
     def eeg_beta_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontBeta = (ch2 + ch3) / 2
-        print("beta_relative: {}".format(frontBeta))
+        print(("beta_relative: {}".format(frontBeta)))
         self.beta_relative = frontBeta
 
     def eeg_gamma_relative_handler(self, address, name, ch1, ch2, ch3, ch4):
         frontGamma = (ch2 + ch3) / 2
-        print("gamma_relative: {}".format(frontGamma))
+        print(("gamma_relative: {}".format(frontGamma)))
         self.gamma_relative = frontGamma
+
+
 
     def run(self):
         """
         start the osc server & message handler
         """
         self.oscServer.serve_forever()
+
 
     def shutdown(self):
         """
@@ -146,8 +156,9 @@ class MuseConnect:
         self.oscServer.shutdown()
 
 
+
 if __name__ == "__main__":
-    # import matplotlib.pyplot as plt  # used for live plot updates
+    #import matplotlib.pyplot as plt  # used for live plot updates 
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip",

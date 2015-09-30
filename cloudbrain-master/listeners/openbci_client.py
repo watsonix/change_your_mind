@@ -19,7 +19,7 @@ class OpenBCIClient(object):
         while True:
             data, addr = self.client.recvfrom(1024)
             sample = json.loads(data)
-            print sample
+            print(sample)
             # todo: store in DB
 
 if __name__ == "__main__":

@@ -79,8 +79,8 @@ class SpacebrewApp(object):
             self.subscribers[name] = Subscriber(name, brewType, default)
 
     def make_config(self):
-        subs = map(lambda x: x.make_config(), self.subscribers.values())
-        pubs = map(lambda x: x.make_config(), self.publishers.values())
+        subs = [x.make_config() for x in list(self.subscribers.values())]
+        pubs = [x.make_config() for x in list(self.publishers.values())]
         d = {'config': {
             'name': self.name,
             'description': self.description,

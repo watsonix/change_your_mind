@@ -100,7 +100,7 @@ class ChangeYourBrainStateControl( object ):
              "value" : {'instruction_name': 'BASELINE_COLLECTION', 'display_seconds': self.baseline_seconds},
              "type": "string", "name": "instruction", "clientName": self.client_name}}    
         self.sb_server.ws.send(json.dumps(instruction))
-        print "start baseline collection" #^^^
+        print("start baseline collection") #^^^
 
         baseline_timer = Timer(self.baseline_seconds,self.start_post_baseline) #*** devNote: may want to send a countdown to visualization %%%
         baseline_timer.start()
@@ -138,7 +138,7 @@ class ChangeYourBrainStateControl( object ):
              "value" : {'instruction_name': 'CONDITION_COLLECTION', 'display_seconds': self.condition_seconds},
              "type": "string", "name": "instruction", "clientName": self.client_name}}    
         self.sb_server.ws.send(json.dumps(instruction))
-        print "start condition collection" #^^^
+        print("start condition collection") #^^^
 
         condition_timer = Timer(self.condition_seconds,self.start_post_condition) #*** devNote: may want to send a countdown to visualization %%%
         condition_timer.start()
@@ -197,7 +197,7 @@ class ChangeYourBrainStateControl( object ):
                 raise Exception ('Unkown sub_state for instruction sent in state ' + str(self.experiment_state))
         else:
             raise Exception ('Unkown state ({}) for instruction sent'.format(self.experiment_state))
-        print "output instruction: {}".format(instruction_text) #^^^
+        print("output instruction: {}".format(instruction_text)) #^^^
         instruction = {"message": {
             "value" : {'instruction_name': 'DISPLAY_INSTRUCTION', 'instruction_text': instruction_text},
             "type": "string", "name": "instruction", "clientName": self.client_name}}    
@@ -214,15 +214,15 @@ class ChangeYourBrainStateControl( object ):
             alpha_out = 1
         self.alpha_buffer = []
 
-        print "hrv type:",type(self.ecg.get_hrv())
-        print "hrv:",self.ecg.get_hrv()
+        print("hrv type:",type(self.ecg.get_hrv()))
+        print("hrv:",self.ecg.get_hrv())
         
         value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time,alpha_out,self.ecg.get_hrv())
         message = {"message": { #send synced EEG & ECG data here
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
-        print "output baseline: {}".format(value_out) #^^^
+        print("output baseline: {}".format(value_out)) #^^^
 
 
     def output_condition(self):
@@ -241,7 +241,7 @@ class ChangeYourBrainStateControl( object ):
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
-        print "output condition: {}".format(value_out) #^^^
+        print("output condition: {}".format(value_out)) #^^^
 
     def output_post_experiment(self):
 
@@ -263,7 +263,7 @@ class ChangeYourBrainStateControl( object ):
              "value": value_out,
              "type": "string", "name": "instruction", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
-        print "output post experiment" #^^^
+        print("output post experiment") #^^^
 
 
     ######################################################
@@ -279,7 +279,7 @@ class ChangeYourBrainStateControl( object ):
                 yield t + count*period - time.time()
         g = g_tick()
         while self.experiment_state == state:
-            time.sleep(g.next())
+            time.sleep(next(g))
             f(*args)
 
     def start_on_lead(self):
@@ -291,8 +291,8 @@ class ChangeYourBrainStateControl( object ):
         if self.experiment_state == SETUP_CONFIRMATION:
             input = ''
             while input != '1':
-                print 'When you are set up and seated, type \'1\' and press enter'
-                input = raw_input()
+                print('When you are set up and seated, type \'1\' and press enter')
+                input = input()
             ### select condition
             self.start_baseline_instructions()
         elif self.experiment_state == BASELINE_CONFIRMATION:

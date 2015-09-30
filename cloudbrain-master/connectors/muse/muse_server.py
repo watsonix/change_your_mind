@@ -39,7 +39,7 @@ class MuseServer(ServerThread):
     @make_method('/muse/eeg', 'ffff')
     def eeg_callback(self, path, args):
         data = [path] + args
-        print data
+        print(data)
         self.sock.sendto(json.dumps(data), (self.receiver_ip, self.receiver_port))
 
     #receive concentration data
@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     try:
         server = MuseServer(9090, 'localhost', 5555, 'marion')
-    except ServerError, err:
-        print str(err)
+    except ServerError as err:
+        print(str(err))
         sys.exit()
 
     try:

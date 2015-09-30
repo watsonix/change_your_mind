@@ -6,8 +6,8 @@ import time
 import json
 import random
 import sys
-import cPickle as pickle
-from state_codes import *
+import pickle as pickle
+from .state_codes import *
 
 if sys.platform == 'win32': #windoze
     import pyHook #for universal keyboard input
@@ -56,7 +56,7 @@ class ChangeYourBrainStateControl( object ):
     def tag_in(self,muse_id='0000'):
         #devNote: put here possible confirmation of user change if in middle of experiment
         self.tag_time = time.time()
-        print 'tagged in at',self.tag_time
+        print('tagged in at',self.tag_time)
         self.alpha_save_condition = {'time': [], 'value':[], 'all': []}
         self.hrv_save_condition = {'time': [], 'value': [], 'rri': [], 'device_time': []}
 
@@ -71,7 +71,7 @@ class ChangeYourBrainStateControl( object ):
     ### STATE CHANGING ############
     def set_state(self,state):
         self.experiment_state = state
-        print time.time(),state
+        print(time.time(),state)
 
     def start_setup_instructions(self):
         #devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
@@ -99,7 +99,7 @@ class ChangeYourBrainStateControl( object ):
              "value" : {'instruction_name': 'BASELINE_COLLECTION', 'display_seconds': self.baseline_seconds},
              "type": "string", "name": "instruction", "clientName": self.client_name}}    
         self.sb_server.ws.send(json.dumps(instruction))
-        print "start baseline collection" 
+        print("start baseline collection") 
 
         baseline_timer = Timer(self.baseline_seconds,self.start_post_baseline)
         baseline_timer.start()
@@ -118,7 +118,7 @@ class ChangeYourBrainStateControl( object ):
             continue
         if self.baseline_confirmation < 0: 
             self.start_baseline_instructions()
-            print 'returning from post_baseline after disconfirmation of correct collection'
+            print('returning from post_baseline after disconfirmation of correct collection')
             return
         ### collect subj info
         self.baseline_subj = []
@@ -129,11 +129,11 @@ class ChangeYourBrainStateControl( object ):
                 if self.experiment_state != BASELINE_CONFIRMATION: #ensure we are in right state
                     return
                 continue
-            print self.baseline_subj
+            print(self.baseline_subj)
             self.baseline_subj.append(self.poll_answer)
             self.poll_answer = False
 
-        print 'baseline user answers: ',self.baseline_subj
+        print('baseline user answers: ',self.baseline_subj)
         self.start_condition_instructions()
 
     def start_condition_instructions(self):
@@ -170,10 +170,10 @@ class ChangeYourBrainStateControl( object ):
                          'baseline_hrv' : self.baseline_hrv},
              "type": "string", "name": "instruction", "clientName": self.client_name}}    
         self.sb_server.ws.send(json.dumps(instruction))
-        print "start condition collection" #^^^
-        print 'display_seconds:', self.condition_seconds
-        print 'baseline_alpha',self.baseline_alpha
-        print 'baseline_hrv', self.baseline_hrv
+        print("start condition collection") #^^^
+        print('display_seconds:', self.condition_seconds)
+        print('baseline_alpha',self.baseline_alpha)
+        print('baseline_hrv', self.baseline_hrv)
 
         condition_timer = Timer(self.condition_seconds,self.start_post_condition) 
         condition_timer.start()
@@ -193,7 +193,7 @@ class ChangeYourBrainStateControl( object ):
             continue
         if self.condition_confirmation < 0: 
             self.start_condition_instructions()
-            print 'returning from post_condition'
+            print('returning from post_condition')
             return
         self.condition_subj = []
         #collect subj info
@@ -207,7 +207,7 @@ class ChangeYourBrainStateControl( object ):
             self.condition_subj.append(self.poll_answer)
             self.poll_answer = False
 
-        print 'condition user answers: ',self.condition_subj
+        print('condition user answers: ',self.condition_subj)
         self.start_post_experiment()
 
     def start_post_experiment(self):
@@ -244,7 +244,7 @@ class ChangeYourBrainStateControl( object ):
                 raise Exception ('Unkown sub_state for instruction sent in state ' + str(self.experiment_state))
         else:
             raise Exception ('Unkown state ({}) for instruction sent'.format(self.experiment_state))
-        print "output instruction: {}".format(instruction_text) 
+        print("output instruction: {}".format(instruction_text)) 
         instruction = {"message": {
             "value" : {'instruction_name': 'DISPLAY_INSTRUCTION', 'instruction_text': instruction_text},
             "type": "string", "name": "instruction", "clientName": self.client_name}}    
@@ -262,7 +262,7 @@ class ChangeYourBrainStateControl( object ):
             self.alpha_save_baseline['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + device time (s) + d time(micros)
         else: 
             alpha_out = 0 # random.random() ###
-            print 'baseline: alpha_buffer empty!'
+            print('baseline: alpha_buffer empty!')
         self.alpha_buffer = []
 
         # print "hrv type:",type(self.ecg.get_hrv())
@@ -313,7 +313,7 @@ class ChangeYourBrainStateControl( object ):
             condition_hrv = self.hrv_save_condition['value'][-1]
         else:
             condition_hrv = 0 ### change me
-            print 'no hrv collected for condition!'
+            print('no hrv collected for condition!')
 
         #output to vis
         value_out = {"instruction_name":"POST_EXPERIMENT",
@@ -340,7 +340,7 @@ class ChangeYourBrainStateControl( object ):
         }
         pickle.dump( output_dict, open( filename, "wb" ) )
 
-        print "output post experiment",value_out 
+        print("output post experiment",value_out) 
 
     ######################################################
     ### HELPER ###########################################
@@ -356,7 +356,7 @@ class ChangeYourBrainStateControl( object ):
         g = g_tick()
         while self.experiment_state == state:
             self.check_ecg_lead() #should turn on ECG cconnection 
-            time.sleep(g.next())
+            time.sleep(next(g))
             self.check_ecg_lead() #check the ECG lead here
             f(*args)
 
@@ -373,12 +373,12 @@ class ChangeYourBrainStateControl( object ):
                 instruction = {"message": {
                     "value" : {'instruction_name': 'CONNECTED', 'type': 'ecg'},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}
-                print "ECG CONNECTED" #^^^
+                print("ECG CONNECTED") #^^^
             else:    
                 instruction = {"message": {
                     "value" : {'instruction_name': 'DISCONNECTED', 'type': 'ecg'},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}
-                print "ECG DISCONNECTED" #^^^
+                print("ECG DISCONNECTED") #^^^
             self.sb_server.ws.send(json.dumps(instruction))
             self.meta_data['time'].append(time.time())
             self.meta_data['value'].append(('ecg_leadon',self.ecg_leadon)) #record this in metadata
@@ -388,8 +388,8 @@ class ChangeYourBrainStateControl( object ):
         if self.experiment_state == SETUP_CONFIRMATION:
             input = ''
             while input != '1':
-                print 'When you are set up and seated, type \'1\' and press enter'
-                input = raw_input()
+                print('When you are set up and seated, type \'1\' and press enter')
+                input = input()
             ### select condition
             self.start_baseline_instructions()
         elif self.experiment_state == BASELINE_CONFIRMATION:
@@ -405,10 +405,10 @@ class ChangeYourBrainStateControl( object ):
         if self.experiment_state == BASELINE_CONFIRMATION:
             if not self.baseline_confirmation:
                 if key_ID in [96,45]: #zero
-                    print 'baseline disconfirmed'
+                    print('baseline disconfirmed')
                     self.baseline_confirmation = -1
                 elif key_ID in [97,35]: #one
-                    print 'baseline confirmed'
+                    print('baseline confirmed')
                     self.baseline_confirmation = 1
             elif not self.poll_answer:
                 if key_ID in [97,35]: 
@@ -432,10 +432,10 @@ class ChangeYourBrainStateControl( object ):
         elif self.experiment_state == CONDITION_CONFIRMATION:
             if not self.condition_confirmation:
                 if key_ID in [96,45]: #zero
-                    print 'condition disconfirmed'
+                    print('condition disconfirmed')
                     self.condition_confirmation = -1
                 elif key_ID in [97,35]: #one
-                    print 'condition confirmed'
+                    print('condition confirmed')
                     self.condition_confirmation = 1
             elif not self.poll_answer:
                 if key_ID in [97,35]: 
@@ -493,7 +493,7 @@ class WindowsKeyboardInput ( threading.Thread ):
 
     def OnKeyboardEvent(self,event):
         #print 'Key:', event.Key
-        print 'KeyID:', event.KeyID
+        print('KeyID:', event.KeyID)
         self.state_control.win_keyboard_input(event.KeyID)
 
         # return True to pass the event to other handlers
@@ -516,7 +516,7 @@ class FakeKeyboardInput ( threading.Thread ):
             else:
                 self.state_control.win_keyboard_input(97)
             time.sleep(1)
-            for k in xrange(98,100): 
+            for k in range(98,100): 
                 self.state_control.win_keyboard_input(k)
                 time.sleep(1)
 

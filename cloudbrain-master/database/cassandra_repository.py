@@ -1,5 +1,5 @@
 __author__ = 'marion'
-import cassandra_settings
+from . import cassandra_settings
 from pycassa.pool import ConnectionPool
 from pycassa.columnfamily import ColumnFamily
 
@@ -35,7 +35,7 @@ class CassandraRepository(object):
 
         self.cf.batch_insert(batch)
         if start_time is not None:
-            print 'time to  insert batch: %s ms' % (int(time.time() * 1000) - start_time)
+            print('time to  insert batch: %s ms' % (int(time.time() * 1000) - start_time))
 
 
     def get(self, timestamp):

@@ -41,7 +41,7 @@ eeg_disconnect_string = "disconnect"
 #base_path = abspath("../..")
 base_path = abspath(".")
 biodata_viz_url = base_path + "/Live_Visualization/biodata_visualization.html"
-print biodata_viz_url
+print(biodata_viz_url)
 #biodata_viz_url = 'file:///C:/Users/ExplorCogTech/src/live-visualization/Live_Visualization/biodata_visualization.html'
 #biodata_viz_url = 'file:///Users/paulsukhanov/Desktop/Explorabrainium/live-visualization-master/Live_Visualization/biodata_visualization.html'
 #biodata_viz_url = 'file:///C:/Users/ExplorCogTech/src/live-visualization/Live_Visualization/biodata_visualization.html'
@@ -89,10 +89,10 @@ class SpacebrewClient(object):
         ]
 
 
-        print 'about to connect to %s' % self.server
+        print('about to connect to %s' % self.server)
         self.ws = create_connection("ws://%s:%s" % (self.server, self.port))
 
-        print 'connected to server'
+        print('connected to server')
         for path in self.osc_paths:
             spacebrew_name = path['address'].split('/')[-1]
             #self.brew.add_subscriber(spacebrew_name, "string")
@@ -107,38 +107,6 @@ class SpacebrewClient(object):
     def set_handle_value(self,metric,handler):
         self.brew.subscribe(metric,handler)
 
-
-    def handle_value(self, string_value):
-
-        print "received string: %s" % string_value
-        value = string_value.split(',')
-        path = value[0]
-        timestamp = value[5]
-
-        '''if (int(timestamp) % 5 == 0):
-            instruction = {"message": {
-                "value" : {"instruction_name": "DISPLAY_INSTRUCTION", "instruction_text": "testing 1 2 3 yeah"},
-                "type": "string", "name": "instruction", "clientName": self.client_name}}
-
-            sb_server_2.ws.send(json.dumps(instruction))'''
-
-        #print "path: %s" % path
-
-        if path == "alpha_absolute":
-            self.timestamp+=1 #should start incrementing (internal) timestamps after we've acquired signal from both EEG and ECG
-            ecg = random.random();
-            value_out = [timestamp] + [(float(value[2])+float(value[3]))/2] + [ecg]
-            message = {"message": { #send synced EEG & ECG data here
-                "value": value_out,
-                "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
-            instruction = {"message": {
-                "value" : "BASELINE_INSTRUCTIONS",
-                "type": "string", "name": "instruction", "clientName": self.client_name}}
-
-
-            sb_server_2.ws.send(json.dumps(message))
-            #sb_server.ws.send(json.dumps(instruction))
-
     def start(self):
         self.brew.start()
 
@@ -152,7 +120,7 @@ class SpacebrewServer(object):
         ]
 
         self.ws = create_connection("ws://%s:%s" % (self.server, self.port))
-        print(self.ws)
+        print((self.ws))
 
         if(port==9000): #if this is the main server instance
 
@@ -204,11 +172,11 @@ class ecg_fake():
         self.lead_count += 1
         if self.lead_count > 5:
             self.cur_lead_on = True
-            print 'lead on'
+            print('lead on')
             return True
         else:
             self.cur_lead_on = False
-            print 'lead off'
+            print('lead off')
             return False
 
     def get_hrv(self):
@@ -233,7 +201,7 @@ class ecg_real(object):
         try:
             self.nskECG = NeuroskyECG(target_port)
         except serial.serialutil.SerialException:
-            print "Could not open target serial port: %s" % target_port
+            print("Could not open target serial port: %s" % target_port)
             sys.exit(1)
 
         #optional call, default is already 1
@@ -349,7 +317,7 @@ parser.add_argument(
 
 if __name__ == "__main__":
 
-    print 'servername: %s' % serverName
+    print('servername: %s' % serverName)
 
     if eeg_source == 'fake':
         global sb_server #Not sure if this needs to be a global or can be made a property of a biodata_client class
@@ -362,7 +330,7 @@ if __name__ == "__main__":
     global sb_server_2 # used for sending out instructions & processed EEG/ECG to the viz
     sb_server_2 = SpacebrewServer(server='127.0.0.1',port=9002,muse_ids=['booth-7'])
 
-    print 'Started SpaceBrew server: instructions and processed EEG/ECG'
+    print('Started SpaceBrew server: instructions and processed EEG/ECG')
 
     global sb_client
     args = parser.parse_args()
@@ -380,13 +348,13 @@ if __name__ == "__main__":
     else:
         ecg = ecg_fake()
 
-    print 'Started SpaceBrew Client & Listener thread'
+    print('Started SpaceBrew Client & Listener thread')
 
     #file_dir = os.path.dirname(os.path.realpath(__file__))
 
     #hard-coding is bad! Somebody who knows python please find this file the right way
 
-    print 'Loading Chrome on platform: ', sys.platform
+    print('Loading Chrome on platform: ', sys.platform)
 
     if sys.platform == 'win32': #windoze
         chrome_path = 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe %s'
@@ -397,24 +365,22 @@ if __name__ == "__main__":
     else: # Linux
         chrome_path = '/usr/bin/google-chrome %s'
         webbrowser.get(chrome_path).open(biodata_viz_url)
-    print 'Chrome Loaded'
+    print('Chrome Loaded')
 
-    print 'hello world 4'
+    print('hello world 4')
 
     # webbrowser.get(chrome_path).open(biodata_viz_url)
     # webbrowser.open(biodata_viz_url)
     #time.sleep(4)
 
-    # uncomment next line to run full timing
-    if timing == "live":
+    if timing == "live":     # run full timing
         sc = ChangeYourBrainStateControl(sb_client.client_name, sb_server_2, ecg=ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 6, condition_inst_sec = 9)
-    # uncomment the next line to run expidited timing (DO NOT CHANGE VALUES)
-    elif timing == "debug":
+    elif timing == "debug": # run expidited timing (DO NOT CHANGE VALUES)
         sc = ChangeYourBrainStateControl(sb_client.client_name, sb_server_2, ecg=ecg, vis_period_sec = .25, baseline_sec = 5, condition_sec = 5, baseline_inst_sec = 2, condition_inst_sec = 2)
-    print 'ChangeYourBrain state engine started, beginning protocol.'
+    print('ChangeYourBrain state engine started, beginning protocol.')
     sb_client.set_handle_value('alpha_absolute',sc.process_eeg_alpha)
 
-    print 'waiting for tag in'
+    print('waiting for tag in')
     if (eeg_source == 'real'):
         #time.sleep(4)
         #sc.tag_in()

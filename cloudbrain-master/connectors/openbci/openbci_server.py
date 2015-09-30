@@ -141,8 +141,8 @@ class OpenBCIBoard(object):
 
     def print_register_settings(self):
         self.ser.write('?')
-        for number in xrange(0, 24):
-            print(self.ser.readline())
+        for number in range(0, 24):
+            print((self.ser.readline()))
 
     """
 
@@ -181,7 +181,7 @@ class OpenBCIBoard(object):
         n_int_32 = self.channels + 1
 
         # Look for end of packet.
-        for i in xrange(max_bytes_to_skip):
+        for i in range(max_bytes_to_skip):
             val = read(1)
             if not val:
                 if not self.ser.inWaiting():
@@ -217,7 +217,7 @@ class OpenBCIBoard(object):
                         # print data
                         return np.concatenate([[t_value], data])  # A list [sample_index, data1, data2, ... datan]
                     elif n_bytes > 0:
-                        print "Warning: Message length is the wrong size! %d should be %d" % (n_bytes, n_int_32 * 4)
+                        print("Warning: Message length is the wrong size! %d should be %d" % (n_bytes, n_int_32 * 4))
                         # Clear the buffer of those bytes.
                         _ = read(n_bytes)
                     else:

@@ -54,7 +54,7 @@ class MuseClient(object):
 
                 # time stats
                 timestamp = row_key.split('_')[1]
-                print "column batch stored in cassandra for %s -- %s ms" % (path, timestamp)
+                print("column batch stored in cassandra for %s -- %s ms" % (path, timestamp))
 
 
 if __name__ == "__main__":
