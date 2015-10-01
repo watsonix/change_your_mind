@@ -9,49 +9,55 @@ import sys
 import pickle as pickle
 from .state_codes import *
 
-if sys.platform == 'win32': #windoze
-    import pyHook #for universal keyboard input
+if sys.platform == 'win32':  # windoze
+    import pyHook  # for universal keyboard input
     import pythoncom
 
-class ChangeYourBrainStateControl( object ):
 
-    def __init__(self,client_name, sb_server, eeg, ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 10, condition_inst_sec = 20):
+class ChangeYourBrainStateControl(object):
+    """
+    Creates the experiment state machine, sending data to the node.js server
+    that runs the visualization
+    """
+    def __init__(self, client_name, sb_server, eeg, ecg, vis_period_sec=.25, baseline_sec=30, condition_sec=90, baseline_inst_sec=10, condition_inst_sec=20):
         self.client_name = client_name
         self.sb_server = sb_server
         self.ecg = ecg
         self.eeg = eeg
         self.set_state(NO_EXPERIMENT)
         self.condition_state = NO_CONDITION
-        self.tag_time = 0 #last time someone tagged in
+        self.tag_time = 0  # last time someone tagged in
         self.vis_period = vis_period_sec
         self.baseline_seconds = baseline_sec
         self.condition_seconds = condition_sec
         self.baseline_instruction_seconds = baseline_inst_sec 
         self.condition_instruction_seconds = condition_inst_sec
 
-        #keyboard input (or fake if not windows)
-        if sys.platform == 'win32': #windoze
+        # keyboard input (or fake if not windows)
+        if sys.platform == 'win32':  # windoze
             self.kInputThread = WindowsKeyboardInput(self)
-            self.kInputThread.daemon = True;
+            self.kInputThread.daemon = True
             self.kInputThread.start()
         else:
             self.kInputThread = FakeKeyboardInput(self)
-            self.kInputThread.daemon = True;
+            self.kInputThread.daemon = True
             self.kInputThread.start()
         # self.kInputThread = ConsoleKeyboardInputThread()
         # self.kInputThread.start()
 
-        self.alpha_buffer = [] #buffering eeg alpha freq
-        self.poll_answer = False #temp holding of subjective rating
-        self.ecg_leadon = False #start with lead off as current state
-        self.filename_prepend = "exploratorium_cyb"
+        self.alpha_buffer = []  # buffering eeg alpha freq
+        self.poll_answer = False  # temp holding of subjective rating
+        self.ecg_leadon = False  # start with lead off as current state
+        self.eeg_leadon = False  # will track eeg.touchingforehead
+        self.eegSensorState = [4, 4, 4, 4]  # start with all off
+        self.filename_prepend = "transtech_cyb"
 
-    ### CALLED VIA SPACEBREW CLIENT LISTENER ############
-    def process_eeg_alpha(self,values):
+    # ## CALLED VIA SPACEBREW CLIENT LISTENER ############
+    def process_eeg_alpha(self, values):
         self.alpha_buffer.append(values)
 
-    def tag_in(self,muse_id='0000'):
-        #devNote: put here possible confirmation of user change if in middle of experiment
+    def tag_in(self, muse_id='0000'):
+        # devNote: put here possible confirmation of user change if in middle of experiment
         self.tag_time = time.time()
         print('tagged in at', self.tag_time)
         self.alpha_save_condition = {'time': [], 'value':[], 'device_time': [], 'all': []}
@@ -65,14 +71,14 @@ class ChangeYourBrainStateControl( object ):
         self.start_setup_instructions()
 
     ######################################################
-    ### STATE CHANGING ############
+    # ## STATE CHANGING ############
     def set_state(self,state):
         self.experiment_state = state
         print(time.time(), state)
 
     def start_setup_instructions(self):
-        #devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
-        self.set_state(SETUP_INSTRUCTIONS)        
+        # devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
+        self.set_state(SETUP_INSTRUCTIONS)
         self.output_instruction()
         self.do_every_while(self.vis_period,SETUP_INSTRUCTIONS,self.start_on_lead) #start as soon as we see ECG lead on
 
@@ -83,7 +89,7 @@ class ChangeYourBrainStateControl( object ):
         self.output_instruction()
         instruction_timer = Timer(self.baseline_instruction_seconds,self.start_baseline_collection) 
         instruction_timer.start()
-        
+
     def start_baseline_collection(self):
         if self.experiment_state != BASELINE_INSTRUCTIONS:
             return        
@@ -91,7 +97,7 @@ class ChangeYourBrainStateControl( object ):
         self.meta_data['value'].append(('state','BASELINE_COLLECTION'))
         self.meta_data['time'].append(time.time())
 
-        #tell viz to go to the baseline screen 
+        # tell viz to go to the baseline screen 
         instruction = {"message": {
              "value" : {'instruction_name': 'BASELINE_COLLECTION', 'display_seconds': self.baseline_seconds},
              "type": "string", "name": "instruction", "clientName": self.client_name}}    
@@ -329,7 +335,8 @@ class ChangeYourBrainStateControl( object ):
              "type": "string", "name": "instruction", "clientName": self.client_name}}
         self.sb_server.ws.send(json.dumps(message))
 
-        #save data to file
+        # save data to file
+        # ew, there are better ways to do this time string
         (tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday,tm_yday,tm_isdst) = time.localtime() #get local time
         filename = '%s_%d.%02d.%02d_%d.%d.%d.dat' % (self.filename_prepend,tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec) 
         output_dict = {
@@ -339,53 +346,78 @@ class ChangeYourBrainStateControl( object ):
             'alpha baseline': self.alpha_save_baseline,
             'alpha condition': self.alpha_save_condition,
         }
-        pickle.dump( output_dict, open(filename, "wb" ) )
+        pickle.dump(output_dict, open(filename, "wb"))
 
         print("output post experiment", value_out) 
 
     ######################################################
-    ### HELPER ###########################################
+    # ## HELPER ###########################################
 
-    def do_every_while(self,period,state,f,*args):
+    def do_every_while(self, period, state, f, *args):
         """Run function f() every period seconds while experiment_state == state."""
         def g_tick():
             t = time.time()
             count = 0
             while True:
                 count += 1
-                yield t + count*period - time.time()
+                yield t + count * period - time.time()
         g = g_tick()
         while self.experiment_state == state:
-            self.check_ecg_lead() #should turn on ECG cconnection 
+            self.check_ecg_lead()  # should turn on ECG cconnection
             time.sleep(next(g))
-            self.check_ecg_lead() #check the ECG lead here
+            self.check_ecg_lead()  # check the ECG lead here
             f(*args)
 
     def start_on_lead(self):
         if self.ecg.is_lead_on():
-            self.check_ecg_lead() #should turn on ECG cconnection 
-            self.start_baseline_instructions() # and then start the state engine
+            self.check_ecg_lead()  # should turn on ECG cconnection
+            self.start_baseline_instructions()  # and then start the state engine
+
+    def check_eeg_lead(self):
+        """
+        check to see state of all of the EEG sensors, and send a message if they have changed
+        """
+        if self.eeg_leadon != self.eeg.onForehead:
+            self.eeg_leadon = self.eeg.onForehead
+            if self.eeg_leadon:
+                instruction = {"message": {
+                    "value": {'instruction_name': 'CONNECTED', 'type': 'eeg'},
+                    "type": "string", "name": "instruction", "clientName": self.client_name}}
+                print("Muse headset CONNECTED")
+            else:
+                instruction = {"message": {
+                    "value": {'instruction_name': 'DISCONNECTED', 'type': 'eeg'},
+                    "type": "string", "name": "instruction", "clientName": self.client_name}}
+                print("Muse headset DISCONNECTED")
+        self.sb_server.ws.send(json.dumps(instruction))
+        self.meta_data['time'].append(time.time())
+        self.meta_data['value'].append(('eeg_leadon', self.eeg_leadon))  # record this in metadata
+
+        # construct the message to send all 4 sensor states and parse it
+        if self.eeg.curSensorState != self.eegSensorState:
+            self.eegSensorState = self.eeg.curSensorState
+            # update the sensor values and send message with new values
 
     def check_ecg_lead(self):
         """ check to see the current state of the ECG lead, and send a message if it changes """
-        if self.ecg.cur_lead_on != self.ecg_leadon: 
+        if self.ecg.cur_lead_on != self.ecg_leadon:
             self.ecg_leadon = self.ecg.cur_lead_on
             if self.ecg_leadon:
                 instruction = {"message": {
-                    "value" : {'instruction_name': 'CONNECTED', 'type': 'ecg'},
+                    "value": {'instruction_name': 'CONNECTED', 'type': 'ecg'},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}
-                print("ECG CONNECTED") #^^^
-            else:    
+                print("ECG CONNECTED")  # ^^^
+            else:
                 instruction = {"message": {
-                    "value" : {'instruction_name': 'DISCONNECTED', 'type': 'ecg'},
+                    "value": {'instruction_name': 'DISCONNECTED', 'type': 'ecg'},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}
-                print("ECG DISCONNECTED") #^^^
+                print("ECG DISCONNECTED")  # ^^^
             self.sb_server.ws.send(json.dumps(instruction))
             self.meta_data['time'].append(time.time())
-            self.meta_data['value'].append(('ecg_leadon',self.ecg_leadon)) #record this in metadata
+            self.meta_data['value'].append(('ecg_leadon', self.ecg_leadon))  # record this in metadata
 
     def keyboard_input(self):
-        #devNote: could do this smarter by not calling this function unless in one of the appropriate states
+        # devNote: could do this smarter by not calling this function unless in one of the appropriate states
         if self.experiment_state == SETUP_CONFIRMATION:
             input = ''
             while input != '1':
@@ -399,13 +431,12 @@ class ChangeYourBrainStateControl( object ):
         elif self.experiment_state == CONDITION_CONFIRMATION:
             pass
             ### confirm valid trial, collect subjective info and proceed to final display %%%
-        #(otherwise do nothing!)
+        # (otherwise do nothing!)
 
     def win_keyboard_input(self,key_ID):
-        #TODO: Press SOME_KEY 3 times in 2 seconds will "tag in"
+        # TODO: Press SOME_KEY 3 times in 2 seconds will "tag in"
 
-
-        #note: each key has 2 IDs because of Num Lock
+        # note: each key has 2 IDs because of Num Lock
         if self.experiment_state == BASELINE_CONFIRMATION:
             if not self.baseline_confirmation:
                 if key_ID in [96,45]: #zero
@@ -463,7 +494,6 @@ class ChangeYourBrainStateControl( object ):
         #(otherwise do nothing!)
 
 class ConsoleKeyboardInputThread ( threading.Thread ):
-    
     def __init__(self):
         super(ConsoleKeyboardInputThread, self).__init__()
         self.running = True
@@ -477,7 +507,6 @@ class ConsoleKeyboardInputThread ( threading.Thread ):
 
 
 class WindowsKeyboardInput ( threading.Thread ):
-    
     def __init__(self, sc_instance):
         super(WindowsKeyboardInput, self).__init__()
         self.state_control = sc_instance
@@ -505,7 +534,6 @@ class WindowsKeyboardInput ( threading.Thread ):
 
 
 class FakeKeyboardInput(threading.Thread):
-    
     def __init__(self, sc_instance):
         super(FakeKeyboardInput, self).__init__()
         self.state_control = sc_instance
@@ -514,13 +542,13 @@ class FakeKeyboardInput(threading.Thread):
         pass
 
     def run( self ):
-        while True: #send 1,2,3 in a loop
+        while True:  # send 1,2,3 in a loop
             if random.random() < .5:
                 self.state_control.win_keyboard_input(96)
             else:
                 self.state_control.win_keyboard_input(97)
             time.sleep(1)
-            for k in range(98,100): 
+            for k in range(98, 100):
                 self.state_control.win_keyboard_input(k)
                 time.sleep(1)
 
