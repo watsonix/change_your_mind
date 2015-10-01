@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ./Spacebrew-spacebrew-672a874/
+cd ./Spacebrew/
 killall python	
 killall node
 sleep 1

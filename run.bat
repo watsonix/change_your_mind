@@ -1,4 +1,4 @@
-cd ./Spacebrew-spacebrew-672a874/
+cd ./Spacebrew/
 taskkill /F /IM node.exe
 taskkill /F /IM python.exe
 start node node_server_forever.js 
