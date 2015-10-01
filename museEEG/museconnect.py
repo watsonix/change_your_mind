@@ -18,9 +18,10 @@ from pythonosc import osc_server
 
 class MuseConnect(object):
     """
-    creates osc server and handlers to read data from Interaxon Muse headset
+    Creates osc server and handlers to read data from Interaxon Muse headset
+    It is meant to be the producer side of a producer-consumer design pattern
 
-    need to have muse-io installed, get SDK from here:
+    You need to have muse-io installed, get SDK from here:
     https://sites.google.com/a/interaxon.ca/muse-developer-site/download
 
     load muse OSC output in command line with:
@@ -32,9 +33,6 @@ class MuseConnect(object):
     Each member that catches information from the muse-io OSC output puts it in a deque object after
     some basic analysis (eg averaging the frontal sensors only)
 
-    NOTE: this class is very poorly written, not pythonic at all. Given the number of
-    OSC paths that we are catching and the self similarity of them, I could be doing this much
-    more efficiently
     """
     def __init__(self, ipAddress="127.0.0.1", port=5000, verbose=True):
         self.verbose = verbose  # if true, print all caught OSC packet analysis products
@@ -63,7 +61,7 @@ class MuseConnect(object):
         # get all values from the queue with (times, values) = muse.popValue()
         self.battery = deque()
         self.touchingforehead = deque()
-        self.leadon = None
+        self.onForehead = None
         self.horseshoe = deque()
         self.currentSensorState = None  # hold just the most recent value from horseshoe
 
@@ -142,7 +140,7 @@ class MuseConnect(object):
         """
         self.vprint("touchingforehead: {}".format(touchingforehead))
         self.touchingforehead.append(touchingforehead)
-        self.leadon = touchingforehead
+        self.onForehead = touchingforehead
 
     def horseshoe_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
