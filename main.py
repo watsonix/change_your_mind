@@ -1,7 +1,3 @@
-
-THIS FILE IS NOW OUT OF DATE AND SHOULD BE DELETED
-
-
 import sys
 import random
 from os.path import abspath
@@ -57,22 +53,21 @@ class SpacebrewServer(object):
         else:
             raise Exception('unknown port!')
 
+# FAKE BRAIN
+class eeg_fake():
+
+    def __init__(self,state_control_instance):
+        self.sc = state_control_instance
 
     def start(self):
         time_stamp = 0
         while 1:
             time_stamp+=1
             time.sleep(0.1)
-            for muse_id in self.muse_ids:
-                for path in self.osc_paths:
-                    metric = path['address'].split('/')[-1]
+            values = (time_stamp,random.random())
+            self.sc.process_eeg_alpha(values)
 
-                    value = "%s,%s,%s,%s,%s,%s" % (random.random(),random.random(),random.random(),random.random(), time_stamp, time_stamp)
-                    message = {"message": {
-                        "value": value,
-                        "type": "string", "name": metric, "clientName": muse_id}}
-                    self.ws.send(json.dumps(message))
-
+# FAKE HEART
 class ecg_fake():
 
     def __init__(self):
@@ -196,27 +191,21 @@ class ecg_real(object):
             return -1
 
 
-class ServerThread ( threading.Thread ):
+class DataThread ( threading.Thread ):
 
-    def __init__(self):
-        super(ServerThread, self).__init__()
+    def __init__(self,data_source):
+        super(DataThread, self).__init__()
         self.running = True
+        self.data_source = data_source
 
     def stop ( self ):
         self.running = False
 
     def run ( self ):
-        sb_server.start()
+        self.data_source.start()
 
 if __name__ == "__main__":
 
-    if eeg_source == 'fake':
-        global sb_server #Not sure if this needs to be a global or can be made a property of a biodata_client class
-        sb_server = SpacebrewServer(muse_ids=['fake-muse'], server='127.0.0.1') #simulating data coming in from our user's muse
-
-        serverThread = ServerThread()
-        serverThread.daemon = True;
-        serverThread.start()
 
     #VISUALIZATION SERVER: used for sending out instructions & processed EEG/ECG to the viz
     global sb_server_2 
@@ -265,6 +254,10 @@ if __name__ == "__main__":
         #sb_client.set_handle_value(eeg_connect_string,sc.tag_in)
         pass
     else:
+        data_thread = DataThread(eeg_fake(sc))
+        data_thread.daemon = True;
+        data_thread.start()
+
         time.sleep(4)
         sc.tag_in()
         time.sleep(12)

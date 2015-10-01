@@ -46,22 +46,17 @@ class ChangeYourBrainStateControl( object ):
         self.filename_prepend = "exploratorium_cyb"
 
     ### CALLED VIA SPACEBREW CLIENT LISTENER ############
-    def process_eeg_alpha(self,value):
-        #TODO: modify to actually just pass numbers!
-        arrValue = value.split(',')
-        self.alpha_buffer.append(arrValue)
-        # print('process_eeg_alpha called')
-        ### make sure buffer gets clear when no subjects
-        ### log data
+    def process_eeg_alpha(self,values):
+        self.alpha_buffer.append(values)
 
     def tag_in(self,muse_id='0000'):
         #devNote: put here possible confirmation of user change if in middle of experiment
         self.tag_time = time.time()
         print('tagged in at', self.tag_time)
-        self.alpha_save_condition = {'time': [], 'value':[], 'all': []}
+        self.alpha_save_condition = {'time': [], 'value':[], 'device_time': [], 'all': []}
         self.hrv_save_condition = {'time': [], 'value': [], 'rri': [], 'device_time': []}
 
-        self.alpha_save_baseline = {'time': [], 'value':[], 'all': []}
+        self.alpha_save_baseline = {'time': [], 'value':[], 'device_time': [], 'all': []}
         self.hrv_save_baseline = {'time': [], 'value':[], 'rri': [], 'device_time': []}
 
         self.meta_data = {'time': [time.time(),], 'value':['TAG_IN',]} #program state etc
@@ -257,22 +252,23 @@ class ChangeYourBrainStateControl( object ):
         """output aggregated EEG and HRV values"""
         #devNote: possibly switch to outputting raw ECG (or heart rate!) instead of HRV during baseline
         if self.alpha_buffer:
-            alpha_out = (float(self.alpha_buffer[-1][1])+float(self.alpha_buffer[-1][2]))/2 ### should modify this to average across TIME!            
+            alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
+            print('alpha_out!',sum(v for t,v in self.alpha_buffer),len(self.alpha_buffer))
             self.alpha_save_baseline['time'].append(time.time())
             self.alpha_save_baseline['value'].append(alpha_out)
-            self.alpha_save_baseline['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + device time (s) + d time(micros)
+            self.alpha_save_baseline['device_time'].append(self.alpha_buffer[-1][0])
+            #self.alpha_save_baseline['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + device time (s) + d time(micros)
         else: 
             alpha_out = 0 # random.random() ###
             print('baseline: alpha_buffer empty!')
         self.alpha_buffer = []
 
-        # print("hrv type:",type(self.ecg.get_hrv()))
-        # print("hrv:",self.ecg.get_hrv())
         self.hrv_save_baseline['time'].append(time.time())
         self.hrv_save_baseline['value'].append(self.ecg.get_hrv())
         self.hrv_save_baseline['device_time'].append(self.ecg.get_hrv_t())
         self.hrv_save_baseline['rri'].append(self.ecg.get_rri())
         value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time,alpha_out,self.ecg.get_hrv())
+        #print(value_out)
         message = {"message": { #send synced EEG & ECG data here
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
@@ -283,10 +279,11 @@ class ChangeYourBrainStateControl( object ):
         """output aggregated EEG and HRV values"""
         # note: currently the same as output_baseline
         if self.alpha_buffer:
-            alpha_out = (float(self.alpha_buffer[-1][1])+float(self.alpha_buffer[-1][2]))/2 ### change this to avg across whole thing
+            alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
             self.alpha_save_condition['time'].append(time.time())
             self.alpha_save_condition['value'].append(alpha_out)
-            self.alpha_save_condition['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + time (s) + time(micros)
+            self.alpha_save_condition['device_time'].append(self.alpha_buffer[-1][0])
+            #self.alpha_save_condition['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + time (s) + time(micros)
         else: 
             alpha_out = 0 #random.random()
         self.alpha_buffer = []
