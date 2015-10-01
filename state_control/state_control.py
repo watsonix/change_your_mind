@@ -15,10 +15,11 @@ if sys.platform == 'win32': #windoze
 
 class ChangeYourBrainStateControl( object ):
 
-    def __init__(self,client_name, sb_server, ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 10, condition_inst_sec = 20):
+    def __init__(self,client_name, sb_server, eeg, ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 10, condition_inst_sec = 20):
         self.client_name = client_name
         self.sb_server = sb_server
         self.ecg = ecg
+        self.eeg = eeg
         self.set_state(NO_EXPERIMENT)
         self.condition_state = NO_CONDITION
         self.tag_time = 0 #last time someone tagged in
@@ -251,6 +252,7 @@ class ChangeYourBrainStateControl( object ):
     def output_baseline(self):
         """output aggregated EEG and HRV values"""
         #devNote: possibly switch to outputting raw ECG (or heart rate!) instead of HRV during baseline
+        self.alpha_buffer = self.eeg.get_alpha()
         if self.alpha_buffer:
             alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
             print('alpha_out!',sum(v for t,v in self.alpha_buffer),len(self.alpha_buffer))
@@ -278,6 +280,7 @@ class ChangeYourBrainStateControl( object ):
     def output_condition(self):
         """output aggregated EEG and HRV values"""
         # note: currently the same as output_baseline
+        self.alpha_buffer = self.eeg.get_alpha()
         if self.alpha_buffer:
             alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
             self.alpha_save_condition['time'].append(time.time())

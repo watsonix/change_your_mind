@@ -56,16 +56,13 @@ class SpacebrewServer(object):
 # FAKE BRAIN
 class eeg_fake():
 
-    def __init__(self,state_control_instance):
-        self.sc = state_control_instance
+    def __init__(self):
+        self.time_stamp = 0
+        self.num_per_call = 10
 
-    def start(self):
-        time_stamp = 0
-        while 1:
-            time_stamp+=1
-            time.sleep(0.1)
-            values = (time_stamp,random.random())
-            self.sc.process_eeg_alpha(values)
+    def get_alpha(self):
+        if self.time_stamp: self.time_stamp += self.num_per_call #not for 0
+        return [(t+self.time_stamp,v) for t,v in enumerate(random.random() for _ in range(self.num_per_call))]
 
 # FAKE HEART
 class ecg_fake():
@@ -190,20 +187,6 @@ class ecg_real(object):
         else:
             return -1
 
-
-class DataThread ( threading.Thread ):
-
-    def __init__(self,data_source):
-        super(DataThread, self).__init__()
-        self.running = True
-        self.data_source = data_source
-
-    def stop ( self ):
-        self.running = False
-
-    def run ( self ):
-        self.data_source.start()
-
 if __name__ == "__main__":
 
 
@@ -220,6 +203,12 @@ if __name__ == "__main__":
         t1.start()
     else:
         ecg = ecg_fake()
+
+    if (eeg_source == 'real'):
+        #TODO: MIKES STUFF HERE
+        eeg = None
+    else:
+        eeg = eeg_fake()
 
     print('Started SpaceBrew Client & Listener thread')
 
@@ -238,26 +227,16 @@ if __name__ == "__main__":
         webbrowser.get(chrome_path).open(biodata_viz_url)
     print('Chrome Loaded')
 
-    print('hello world 4')
-
     if timing == "live":     # run full timing #TODO: change 'booth-7' name in live routes json etc
-        sc = ChangeYourBrainStateControl('booth-7', sb_server_2, ecg=ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 6, condition_inst_sec = 9)
+        sc = ChangeYourBrainStateControl('booth-7', sb_server_2, eeg=eeg, ecg=ecg, vis_period_sec = .25, baseline_sec = 30, condition_sec = 90, baseline_inst_sec = 6, condition_inst_sec = 9)
     elif timing == "debug": # run expidited timing (DO NOT CHANGE VALUES)
-        sc = ChangeYourBrainStateControl('booth-7', sb_server_2, ecg=ecg, vis_period_sec = .25, baseline_sec = 5, condition_sec = 5, baseline_inst_sec = 2, condition_inst_sec = 2)
+        sc = ChangeYourBrainStateControl('booth-7', sb_server_2, eeg=eeg, ecg=ecg, vis_period_sec = .25, baseline_sec = 5, condition_sec = 5, baseline_inst_sec = 2, condition_inst_sec = 2)
     print('ChangeYourBrain state engine started, beginning protocol.')
     #TODO: setup some other type of handler
     #sb_client.set_handle_value('alpha_absolute',sc.process_eeg_alpha)
 
     print('waiting for tag in')
-    if (eeg_source == 'real'):
-        #TODO: setup some other type of handler
-        #sb_client.set_handle_value(eeg_connect_string,sc.tag_in)
-        pass
-    else:
-        data_thread = DataThread(eeg_fake(sc))
-        data_thread.daemon = True;
-        data_thread.start()
-
+    if (eeg_source == 'fake'):
         time.sleep(4)
         sc.tag_in()
         time.sleep(12)
