@@ -11,6 +11,6 @@ REM taskkill /F /IM chrome.exe
 REM start "" "C:\Program Files (x86)\Windows Media Player\wmplayer.exe" "C:\Users\ExplorCogTech\Music\stream.wav"
 start "" "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --kiosk
 timeout /t 1 /nobreak
-activate py3
-timeout /t 3 /nobreak
-python main.py
+REM activate py3
+REM timeout /t 3 /nobreak
+start runmain.bat

@@ -13,8 +13,8 @@ from ecg.neurosky_ecg import NeuroskyECG
 import serial
 from museEEG.museconnect import MuseConnect
 
-eeg_source = "real"  # fake or real
-# eeg_source = "fake"  # fake or real
+# eeg_source = "real"  # fake or real
+eeg_source = "fake"  # fake or real
 
 # ecg_source = "real"  # fake or real
 ecg_source = "fake"  # fake or real
@@ -57,6 +57,8 @@ class eeg_fake():  # FAKE BRAIN
     def __init__(self):
         self.time_stamp = 0
         self.num_per_call = 10
+        self.onForehead = True
+        self.curSensorState = [1, 1, 1, 1]
 
     def get_alpha(self):
         if self.time_stamp:

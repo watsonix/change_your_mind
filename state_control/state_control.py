@@ -391,9 +391,9 @@ class ChangeYourBrainStateControl(object):
                     "value": {'instruction_name': 'DISCONNECTED', 'type': 'eeg'},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}
                 print("Muse headset DISCONNECTED")
-        self.sb_server.ws.send(json.dumps(instruction))
-        self.meta_data['time'].append(time.time())
-        self.meta_data['value'].append(('eeg_leadon', self.eeg_leadon))  # record this in metadata
+            self.sb_server.ws.send(json.dumps(instruction))
+            self.meta_data['time'].append(time.time())
+            self.meta_data['value'].append(('eeg_leadon', self.eeg_leadon))  # record this in metadata
 
         # construct the message to send all 4 sensor states and parse it
         if self.eeg.curSensorState != self.eegSensorState:
