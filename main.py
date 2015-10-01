@@ -29,7 +29,7 @@ biodata_viz_url = base_path + "/Live_Visualization/biodata_visualization.html"
 #biodata_viz_url = 'file:///C:/Users/ExplorCogTech/src/live-visualization/Live_Visualization/biodata_visualization.html'
 
 class SpacebrewServer(object):
-    def __init__(self, muse_ids=['fake-muse'], server='127.0.0.1', port=9000):
+    def __init__(self, muse_ids, server, port):
         self.server = server
         self.port = port
         self.muse_ids = muse_ids
@@ -232,10 +232,9 @@ if __name__ == "__main__":
     elif timing == "debug": # run expidited timing (DO NOT CHANGE VALUES)
         sc = ChangeYourBrainStateControl('booth-7', sb_server_2, eeg=eeg, ecg=ecg, vis_period_sec = .25, baseline_sec = 5, condition_sec = 5, baseline_inst_sec = 2, condition_inst_sec = 2)
     print('ChangeYourBrain state engine started, beginning protocol.')
-    #TODO: setup some other type of handler
-    #sb_client.set_handle_value('alpha_absolute',sc.process_eeg_alpha)
 
     print('waiting for tag in')
+    #TODO: this will need to be a keyboard tag in. OR ... we could 'tag_out' after 5 seconds of EEG disconnect
     if (eeg_source == 'fake'):
         time.sleep(4)
         sc.tag_in()

@@ -402,6 +402,9 @@ class ChangeYourBrainStateControl( object ):
         #(otherwise do nothing!)
 
     def win_keyboard_input(self,key_ID):
+        #TODO: Press SOME_KEY 3 times in 2 seconds will "tag in"
+
+
         #note: each key has 2 IDs because of Num Lock
         if self.experiment_state == BASELINE_CONFIRMATION:
             if not self.baseline_confirmation:
