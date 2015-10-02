@@ -80,6 +80,7 @@ class MuseConnect(object):
         self.beta_relative = deque()
         self.gamma_relative = deque()
 
+        # self.oscServer = osc_server.ForkingOSCUDPServer((ipAddress, port), self.oscDispatcher)
         self.oscServer = osc_server.ThreadingOSCUDPServer((ipAddress, port), self.oscDispatcher)
         self.oscServer.daemon = True
         print("Muse OSC client running on {}".format(self.oscServer.server_address))
@@ -91,7 +92,7 @@ class MuseConnect(object):
         self.connected = True
         # self.oscServer.serve_forever()
         t = threading.Thread(target=self.oscServer.serve_forever)
-        t.daemon = True
+        t.daemon = False
         t.start()
         print("Started Muse OSC reader")
 
@@ -226,8 +227,8 @@ if __name__ == "__main__":
                         help="The port to listen on")
     args = parser.parse_args()
 
-    muse = MuseConnect(args.ip, args.port, verbose=True)
-
+    #muse = MuseConnect(args.ip, args.port, verbose=True)
+    muse = MuseConnect(verbose=True)
     muse.start()
 
     # catch the kill stroke

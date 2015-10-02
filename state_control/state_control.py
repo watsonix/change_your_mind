@@ -253,7 +253,7 @@ class ChangeYourBrainStateControl(object):
 
     def output_instruction(self,sub_state=None):
         if self.experiment_state == SETUP_INSTRUCTIONS:
-            instruction_text = 'This booth requires approximately a three minute commitment. To begin, sit down, put on headphones, and place hands on sensors.'
+            instruction_text = 'This booth requires approximately a three minute commitment. To begin, sit down and place hands on the ECG sensors.'
         elif self.experiment_state == BASELINE_INSTRUCTIONS:
             instruction_text = 'Give us 30 seconds to calibrate to your brain and body. Please stay still and silent, keeping your hands on the sensors.'
         elif self.experiment_state == CONDITION_INSTRUCTIONS:
@@ -303,7 +303,7 @@ class ChangeYourBrainStateControl(object):
         self.hrv_save_baseline['value'].append(self.ecg.get_hrv())
         self.hrv_save_baseline['device_time'].append(self.ecg.get_hrv_t())
         self.hrv_save_baseline['rri'].append(self.ecg.get_rri())
-        value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time,alpha_out,self.ecg.get_hrv())
+        value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time, alpha_out, self.ecg.get_hrv())
         #print(value_out)
         message = {"message": { #send synced EEG & ECG data here
              "value": value_out,
@@ -330,7 +330,7 @@ class ChangeYourBrainStateControl(object):
         self.hrv_save_condition['device_time'].append(self.ecg.get_hrv_t())
         self.hrv_save_condition['rri'].append(self.ecg.get_rri())
 
-        value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time,alpha_out,self.ecg.get_hrv())
+        value_out = "{:.1f},{:.2f},{:.2f}".format(time.time()-self.tag_time, alpha_out, self.ecg.get_hrv())
         message = {"message": { #send synced EEG & ECG data here
              "value": value_out,
              "type": "string", "name": "eeg_ecg", "clientName": self.client_name}}
