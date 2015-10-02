@@ -1,3 +1,4 @@
+REM start runmuse.bat
 cd ./Spacebrew/
 taskkill /F /IM node.exe
 taskkill /F /IM python.exe
