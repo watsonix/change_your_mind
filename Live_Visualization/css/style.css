@@ -7,6 +7,9 @@ body
 }
 a, a:link, a:visited { text-decoration: none; }
 
+.indicator-circle {
+
+}
 
 .floatingSquare
 {
@@ -123,6 +126,10 @@ circle {
 
 .connection {
   margin: 15px 15px auto;
+  font-size: 20px;
+}
+.sensor {
+  margin: 2px 2px auto;
   font-size: 20px;
 }
 

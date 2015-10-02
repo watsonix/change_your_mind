@@ -372,6 +372,7 @@ class ChangeYourBrainStateControl(object):
 
     def start_on_ecg_lead(self):
         if self.ecg.is_lead_on():
+            self.check_eeg_lead()
             self.check_ecg_lead()  # should turn on ECG cconnection
             self.start_baseline_instructions()  # and then start the state engine
 
@@ -398,7 +399,11 @@ class ChangeYourBrainStateControl(object):
         # construct the message to send all 4 sensor states and parse it
         if self.eeg.curSensorState != self.eegSensorState:
             self.eegSensorState = self.eeg.curSensorState
-            # TODO: update the sensor values and send message with new values
+            instruction = {"message": {
+                    "value": {'instruction_name': 'EEG_SENSOR', 'sensorstate': self.eegSensorState},
+                    "type": "string", "name": "instruction", "clientName": self.client_name}}
+            print("Muse headset sensorstate", self.eegSensorState)
+            self.sb_server.ws.send(json.dumps(instruction))
 
     def check_ecg_lead(self):
         """ check to see the current state of the ECG lead, and send a message if it changes """
