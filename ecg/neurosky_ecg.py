@@ -246,7 +246,9 @@ class NeuroskyECG(object):
     def _ecgInitAlgLib(self, libname='TgEcgAlg64.dll', power_frequency=60):
         """ initialize the TgEcg algorithm dll """
         curFN = inspect.getfile(inspect.currentframe())
-        curFN = curFN.split("/")
+        print("curFN:", curFN)
+        curFN = curFN.split(os.path.sep)
+        print("split curFN:", curFN)
         if len(curFN) != 1:
             libRoot = "/".join(curFN[:-1]) + "/"
             print("library dir: ", libRoot)
