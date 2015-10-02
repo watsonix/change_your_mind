@@ -2,6 +2,6 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .dat
-data/
+data/*
 Spacebrew/data/routes/live/live_persist_config.json
 node_modules/
