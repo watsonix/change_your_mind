@@ -16,14 +16,8 @@ from museEEG.museconnect import MuseConnect
 eeg_source = "real"  # fake or real
 # eeg_source = "fake"  # fake or real
 
-<<<<<<< Updated upstream
 # ecg_source = "real"  # fake or real
 ecg_source = "fake"  # fake or real
-=======
-ecg_comPort = "COM7"  # windows com port
-ecg_source = "real"  # fake or real
-# ecg_source = "fake"  # fake or real
->>>>>>> Stashed changes
 
 # timing = "live"  # for full timing as in exploratorium visitor mode
 timing = "debug"  # for quick debug timing
