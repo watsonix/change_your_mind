@@ -33,10 +33,18 @@
                             </div>
                             <span class="label-name" id="ecg_state">ECG: Not Connected</span>
                         </li>
-                        <li class="sensor"><div class="eeg-sensor1"> <i class="fa fa-circle text-muted"></i></div></li>
-                        <li class="sensor"><div class="eeg-sensor2"> <i class="fa fa-circle text-muted"></i></div></li>
-                        <li class="sensor"><div class="eeg-sensor3"> <i class="fa fa-circle text-muted"></i></div></li>
-                        <li class="sensor"><div class="eeg-sensor4"> <i class="fa fa-circle text-muted"></i></div></li>
+                        <li class="sensor">
+                            <div class="eeg-sensor1"><i class="fa fa-circle text-muted"></i></div>
+                        </li>
+                        <li class="sensor">
+                            <div class="eeg-sensor2"><i class="fa fa-circle text-muted"></i></div>
+                        </li>
+                        <li class="sensor">
+                            <div class="eeg-sensor3"><i class="fa fa-circle text-muted"></i></div>
+                        </li>
+                        <li class="sensor">
+                            <div class="eeg-sensor4"><i class="fa fa-circle text-muted"></i></div>
+                        </li>
 
                         <li class="connection">
                             <div class="eeg-indicator"><i class="fa fa-circle text-danger"></i></div>
@@ -221,6 +229,7 @@
             var ecg_state = "DISCONNECTED";
             var indicator_connected = '<i class="fa fa-circle text-success"></i>';
             var indicator_disconnected = '<i class="fa fa-circle text-danger"></i>';
+            var indicator_connectedgood = '<i class="fa fa-circle text-success"></i>';
             var indicator_connectedok = '<i class="fa fa-circle text-warning"></i>';
             var indicator_connectedbad = '<i class="fa fa-circle text-muted"></i>';
             var eeg_buffer = [];
@@ -534,18 +543,25 @@ function update_ui(instruction)
 
     }
     else if (instruction.instruction_name == "EEG_SENSOR") {
+        console.log("received EEG sensor data:")
+        console.log(instruction.sensorstate)
         for (i=0; i<4; i++) {
             var n = instruction.sensorstate[i]
             var ns = n.toString()
             var name = ".eeg_sensor"
-            name = name.concat(ns)
+            //console.log(i.toString())
+            name = name.concat((i+1).toString())
+            console.log("sensor " + name + " " + i + ": " + ns)
             if (n==1) {
-                $(name).html(indicator_connected)
+                console.log(indicator_connectedgood)
+                $(name).html(indicator_connectedgood)
             }
             else if (n==2) {
+                console.log(indicator_connectedok)
                 $(name).html(indicator_connectedok)
             }
             else {
+                console.log(indicator_connectedbad)
                 $(name).html(indicator_connectedbad)   
             }
         }
