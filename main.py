@@ -16,8 +16,8 @@ from museEEG.museconnect import MuseConnect
 # eeg_source = "real"  # fake or real
 eeg_source = "fake"  # fake or real
 
-ecg_source = "real"  # fake or real
-# ecg_source = "fake"  # fake or real
+# ecg_source = "real"  # fake or real
+ecg_source = "fake"  # fake or real
 
 # timing = "live"  # for full timing as in exploratorium visitor mode
 timing = "debug"  # for quick debug timing
@@ -55,16 +55,25 @@ class SpacebrewServer(object):
 
 
 class eeg_fake():  # FAKE BRAIN
-    def __init__(self):
-        self.time_stamp = 0
+    def __init__(self,sec_til_start=4):
         self.num_per_call = 10
+        self.time_stamp = -self.num_per_call
         self.onForehead = True
         self.curSensorState = [1, 1, 1, 1]
+        self.init_time = time.time()
+        self.sec_til_start = sec_til_start
 
     def get_alpha(self):
-        if self.time_stamp:
-            self.time_stamp += self.num_per_call  # not for 0
+        self.time_stamp += self.num_per_call  
         return [(t + self.time_stamp, v) for t, v in enumerate(random.random() for _ in range(self.num_per_call))]
+
+    def is_on_forehead(self):
+        if time.time() - self.init_time > self.sec_til_start:
+            return 1
+        return 0
+
+    def get_sec_since_last_forehead_trans(self):
+        return 4
 
 
 class ecg_fake():  # FAKE HEART
@@ -77,11 +86,11 @@ class ecg_fake():  # FAKE HEART
         self.lead_count += 1
         if self.lead_count > 5:
             self.cur_lead_on = True
-            print('lead on')
+            # print('lead on')
             return True
         else:
             self.cur_lead_on = False
-            print('lead off')
+            # print('lead off')
             return False
 
     def get_hrv(self):
@@ -202,7 +211,6 @@ if __name__ == "__main__":
         ecg = ecg_fake()
 
     if (eeg_source == 'real'):
-        # TODO: MIKES STUFF HERE
         eeg = MuseConnect(verbose=False)
         eeg.start()
     else:
@@ -231,11 +239,11 @@ if __name__ == "__main__":
         sc = ChangeYourBrainStateControl('booth-7', sb_server_2, eeg=eeg, ecg=ecg, vis_period_sec=.25, baseline_sec=5, condition_sec=5, baseline_inst_sec=2, condition_inst_sec=2)
     print('ChangeYourBrain state engine started, beginning protocol.')
 
-    print('waiting for tag in')
+    # print('waiting for tag in')
     # TODO: this will need to be a keyboard tag in. OR ... we could 'tag_out' after 5 seconds of EEG disconnect
-    if (eeg_source == 'fake'):
-        time.sleep(4)
-        sc.tag_in()
-        time.sleep(12)
-        sc.tag_in()  # TEST
+    # if (eeg_source == 'fake'):
+    #     time.sleep(4)
+    #     sc.tag_in()
+    #     # time.sleep(12)
+    #     # sc.tag_in()  # TEST
 

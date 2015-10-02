@@ -13,6 +13,8 @@ if sys.platform == 'win32':  # windoze
     import pyHook  # for universal keyboard input
     import pythoncom
 
+forehead_tag_in_time = 3 #second since started touching forehead to tag on
+forehead_tag_out_time = 3 #second since stopped touching forehead to tag ff
 
 class ChangeYourBrainStateControl(object):
     """
@@ -25,8 +27,7 @@ class ChangeYourBrainStateControl(object):
         self.ecg = ecg
         self.eeg = eeg
         self.set_state(NO_EXPERIMENT)
-        self.condition_state = NO_CONDITION
-        self.tag_time = 0  # last time someone tagged in
+        self.tag_time = None # last time someone tagged in
         self.vis_period = vis_period_sec
         self.baseline_seconds = baseline_sec
         self.condition_seconds = condition_sec
@@ -50,9 +51,12 @@ class ChangeYourBrainStateControl(object):
         self.ecg_leadon = False  # start with lead off as current state
         self.eeg_leadon = False  # will track eeg.touchingforehead
         self.eegSensorState = [4, 4, 4, 4]  # start with all off
-        self.filename_prepend = "transtech_cyb"
+        self.filename_prepend = "transtech_cym"
+        self.meta_data = {'time': [], 'value':[]} #program state etc
 
-    # ## CALLED VIA SPACEBREW CLIENT LISTENER ############
+        self.do_every_while(self.vis_period, NO_EXPERIMENT, self.check_for_tag_out_in) #start looking for EEG 'tag in'
+
+    # ## CALLED VIA _________ ############
     def process_eeg_alpha(self, values):
         self.alpha_buffer.append(values)
 
@@ -70,11 +74,28 @@ class ChangeYourBrainStateControl(object):
 
         self.start_setup_instructions()
 
+    def check_for_tag_out_in(self):
+        """
+        'tag out' currently means transition from muse on forehead to off and vice versa
+        """
+        print('checking tag status')
+        if self.tag_time: #if already tagged in, check for tag out
+            print('last tagged in. checking for tag out')
+            if (not self.eeg.is_on_forehead() and 
+                self.eeg.get_sec_since_last_forehead_trans() > forehead_tag_out_time):
+                self.tag_time = None
+        else: #check for tag in
+            print('last tagged out. checking for tag in')
+            if (self.eeg.is_on_forehead() and 
+                self.eeg.get_sec_since_last_forehead_trans() > forehead_tag_in_time):
+                self.tag_in()            
+
+
     ######################################################
     # ## STATE CHANGING ############
     def set_state(self, state):
         self.experiment_state = state
-        print(time.time(), state)
+        print('setting state at {} to {}'.format(time.time(), state))
 
     def start_setup_instructions(self):
         # devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
@@ -219,6 +240,7 @@ class ChangeYourBrainStateControl(object):
             return
         self.set_state(POST_EXPERIMENT)
         self.output_post_experiment()
+        self.do_every_while(self.vis_period,POST_EXPERIMENT,self.check_for_tag_out_in) # instruct to look continually for tag out/in
 
     ######################################################
     ### OUTPUT TO VISUALIZTION ###########################
@@ -363,16 +385,16 @@ class ChangeYourBrainStateControl(object):
                 yield t + count * period - time.time()
         g = g_tick()
         while self.experiment_state == state:
-            self.check_eeg_lead()
-            self.check_ecg_lead()  # should turn on ECG cconnection
+            self.check_eeg_lead()   
+            self.check_ecg_lead()  # should turn on ECG cconnection indicator
+            self.check_for_tag_out_in() # check if someone leaves experiment early
             time.sleep(next(g))  # wait for a bit, based on the period
-            self.check_eeg_lead()
-            self.check_ecg_lead()  # check the ECG lead here
+            # self.check_eeg_lead()
+            # self.check_ecg_lead()  # check the ECG lead here
             f(*args)
 
     def start_on_ecg_lead(self):
-        if self.ecg.is_lead_on():
-            self.check_ecg_lead()  # should turn on ECG cconnection
+        if self.check_ecg_lead():
             self.start_baseline_instructions()  # and then start the state engine
 
     def check_eeg_lead(self):
@@ -402,8 +424,8 @@ class ChangeYourBrainStateControl(object):
 
     def check_ecg_lead(self):
         """ check to see the current state of the ECG lead, and send a message if it changes """
-        if self.ecg.cur_lead_on != self.ecg_leadon:
-            self.ecg_leadon = self.ecg.cur_lead_on
+        if self.ecg.is_lead_on() != self.ecg_leadon:
+            self.ecg_leadon = self.ecg.is_lead_on()
             if self.ecg_leadon:
                 instruction = {"message": {
                     "value": {'instruction_name': 'CONNECTED', 'type': 'ecg'},
@@ -417,6 +439,7 @@ class ChangeYourBrainStateControl(object):
             self.sb_server.ws.send(json.dumps(instruction))
             self.meta_data['time'].append(time.time())
             self.meta_data['value'].append(('ecg_leadon', self.ecg_leadon))  # record this in metadata
+        return self.ecg_leadon
 
     def keyboard_input(self):
         # devNote: could do this smarter by not calling this function unless in one of the appropriate states
@@ -426,6 +449,7 @@ class ChangeYourBrainStateControl(object):
                 print('When you are set up and seated, type \'1\' and press enter')
                 input = input()
             ### select condition
+            print("SHOULDN'T EVER GET HERE*****")
             self.start_baseline_instructions()
         elif self.experiment_state == BASELINE_CONFIRMATION:
             pass

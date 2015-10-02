@@ -4,3 +4,4 @@ __pycache__/
 .dat
 data/
 Spacebrew/data/routes/live/live_persist_config.json
+node_modules/

@@ -63,7 +63,7 @@ class MuseConnect(object):
         self.battery = deque()
         self.touchingforehead = deque()
         self.onForehead = None
-        self.secondsSinceLastForeheadContactTransition = 0  # the time delta since the last time the forehead contact changed state
+        self.sec_since_last_forehead_trans = 0  # the time delta since the last time the forehead contact changed state
         self._contactTransTime = 0  # the time that we observed the transition of contact state
         self.horseshoe = deque()
         self.currentSensorState = None  # hold just the most recent value from horseshoe
@@ -147,7 +147,7 @@ class MuseConnect(object):
             self._contactTransTime = curtime
         self.touchingforehead.append((curtime, touchingforehead))
         self.onForehead = touchingforehead
-        self.secondsSinceLastForeheadContactTransition = curtime - self._contactTransTime
+        self.sec_since_last_forehead_trans = curtime - self._contactTransTime
 
     def horseshoe_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
@@ -190,6 +190,12 @@ class MuseConnect(object):
         the absolute alpha power
         """
         return self.popAll("alpha_absolute")
+
+    def is_on_forehead(self):
+        return self.onForehead
+
+    def get_sec_since_last_forehead_trans(self):
+        return self.sec_since_last_forehead_trans
 
     def getSensorState(self):
         """
