@@ -13,8 +13,8 @@ from ecg.neurosky_ecg import NeuroskyECG
 import serial
 from museEEG.museconnect import MuseConnect
 
-eeg_source = "real"  # fake or real
-# eeg_source = "fake"  # fake or real
+# eeg_source = "real"  # fake or real
+eeg_source = "fake"  # fake or real
 
 # ecg_source = "real"  # fake or real
 ecg_source = "fake"  # fake or real
@@ -65,7 +65,8 @@ class eeg_fake():  # FAKE BRAIN
 
     def get_alpha(self):
         self.time_stamp += self.num_per_call  
-        return [(t + self.time_stamp, v) for t, v in enumerate(random.random() for _ in range(self.num_per_call))]
+        return [random.random() for _ in range(self.num_per_call)]
+        # return [(t + self.time_stamp, v) for t, v in enumerate(random.random() for _ in range(self.num_per_call))]
 
     def is_on_forehead(self):
         if time.time() - self.init_time > self.sec_til_start:
