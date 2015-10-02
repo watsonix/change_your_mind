@@ -16,7 +16,6 @@ from museEEG.museconnect import MuseConnect
 # eeg_source = "real"  # fake or real
 eeg_source = "fake"  # fake or real
 
-ecg_comPort = "COM7"  # windows com port
 ecg_source = "real"  # fake or real
 # ecg_source = "fake"  # fake or real
 
@@ -25,6 +24,7 @@ timing = "debug"  # for quick debug timing
 
 eeg_connect_string = "connect"
 eeg_disconnect_string = "disconnect"
+ecg_comPort = "COM7"  # windows com port
 
 base_path = abspath(".")
 biodata_viz_url = base_path + "/Live_Visualization/biodata_visualization.html"
