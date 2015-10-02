@@ -13,11 +13,17 @@ from ecg.neurosky_ecg import NeuroskyECG
 import serial
 from museEEG.museconnect import MuseConnect
 
-# eeg_source = "real"  # fake or real
-eeg_source = "fake"  # fake or real
+eeg_source = "real"  # fake or real
+# eeg_source = "fake"  # fake or real
 
+<<<<<<< Updated upstream
 # ecg_source = "real"  # fake or real
 ecg_source = "fake"  # fake or real
+=======
+ecg_comPort = "COM7"  # windows com port
+ecg_source = "real"  # fake or real
+# ecg_source = "fake"  # fake or real
+>>>>>>> Stashed changes
 
 # timing = "live"  # for full timing as in exploratorium visitor mode
 timing = "debug"  # for quick debug timing
@@ -246,4 +252,3 @@ if __name__ == "__main__":
     #     sc.tag_in()
     #     # time.sleep(12)
     #     # sc.tag_in()  # TEST
-
