@@ -139,6 +139,7 @@ class ChangeYourBrainStateControl(object):
         self.baseline_confirmation = 0 #confirmed = 1, disconfirmed = -1
         self.output_instruction('CONFIRMATION')
         while not self.baseline_confirmation: #neither confirmed nor disconfirmed
+            self.check_eeg_lead()
             self.check_ecg_lead() #should turn on ECG cconnection 
             continue
         if self.baseline_confirmation < 0: 
@@ -150,6 +151,7 @@ class ChangeYourBrainStateControl(object):
         for question in ['Q1','Q2','Q3','Q4']:
             self.output_instruction(question)
             while not self.poll_answer:
+                self.check_eeg_lead()
                 self.check_ecg_lead() #should turn on ECG cconnection 
                 if self.experiment_state != BASELINE_CONFIRMATION: #ensure we are in right state
                     return
@@ -214,6 +216,7 @@ class ChangeYourBrainStateControl(object):
         self.condition_confirmation = 0 #confirmed = 1, disconfirmed = -1
         self.output_instruction('CONFIRMATION')
         while not self.condition_confirmation: #neither confirmed nor disconfirmed
+            self.check_eeg_lead()
             self.check_ecg_lead() #should turn on ECG cconnection 
             continue
         if self.condition_confirmation < 0: 
@@ -225,6 +228,7 @@ class ChangeYourBrainStateControl(object):
         for question in ['Q1','Q2','Q3','Q4']:
             self.output_instruction(question)
             while not self.poll_answer:
+                self.check_eeg_lead()
                 self.check_ecg_lead() #should turn on ECG cconnection 
                 if self.experiment_state != CONDITION_CONFIRMATION: #ensure we are in right state
                     return
@@ -282,12 +286,12 @@ class ChangeYourBrainStateControl(object):
         """output aggregated EEG and HRV values"""
         #devNote: possibly switch to outputting raw ECG (or heart rate!) instead of HRV during baseline
         self.alpha_buffer = self.eeg.get_alpha()
-        if self.alpha_buffer:
-            alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
-            print('alpha_out!',sum(v for t,v in self.alpha_buffer),len(self.alpha_buffer))
+        if len(self.alpha_buffer) != 0:
+            alpha_out = sum(v for v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
+            print('alpha_out!',sum(v for v in self.alpha_buffer), len(self.alpha_buffer))
             self.alpha_save_baseline['time'].append(time.time())
             self.alpha_save_baseline['value'].append(alpha_out)
-            self.alpha_save_baseline['device_time'].append(self.alpha_buffer[-1][0])
+            # self.alpha_save_baseline['device_time'].append(self.alpha_buffer[-1][0])
             #self.alpha_save_baseline['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + device time (s) + d time(micros)
         else: 
             alpha_out = 0 # random.random() ###
@@ -310,11 +314,11 @@ class ChangeYourBrainStateControl(object):
         """output aggregated EEG and HRV values"""
         # note: currently the same as output_baseline
         self.alpha_buffer = self.eeg.get_alpha()
-        if self.alpha_buffer:
-            alpha_out = sum(v for t,v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
+        if len(self.alpha_buffer) != 0:
+            alpha_out = sum(v for v in self.alpha_buffer)/len(self.alpha_buffer) #note: if change order of tuple must change line below
             self.alpha_save_condition['time'].append(time.time())
             self.alpha_save_condition['value'].append(alpha_out)
-            self.alpha_save_condition['device_time'].append(self.alpha_buffer[-1][0])
+            # self.alpha_save_condition['device_time'].append(self.alpha_buffer[-1][0])
             #self.alpha_save_condition['all'].append(self.alpha_buffer[-1]) #for saving. format: 4 sensor vals + time (s) + time(micros)
         else: 
             alpha_out = 0 #random.random()
@@ -420,7 +424,9 @@ class ChangeYourBrainStateControl(object):
 
         # construct the message to send all 4 sensor states and parse it
         if self.eeg.curSensorState != self.eegSensorState:
+            print("sensor state changed from {} to {}".format(self.eegSensorState, self.eeg.curSensorState))
             self.eegSensorState = self.eeg.curSensorState
+
             instruction = {"message": {
                     "value": {'instruction_name': 'EEG_SENSOR', 'sensorstate': self.eegSensorState},
                     "type": "string", "name": "instruction", "clientName": self.client_name}}

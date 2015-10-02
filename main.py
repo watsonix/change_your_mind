@@ -13,8 +13,8 @@ from ecg.neurosky_ecg import NeuroskyECG
 import serial
 from museEEG.museconnect import MuseConnect
 
-# eeg_source = "real"  # fake or real
-eeg_source = "fake"  # fake or real
+eeg_source = "real"  # fake or real
+# eeg_source = "fake"  # fake or real
 
 # ecg_source = "real"  # fake or real
 ecg_source = "fake"  # fake or real
@@ -246,4 +246,3 @@ if __name__ == "__main__":
     #     sc.tag_in()
     #     # time.sleep(12)
     #     # sc.tag_in()  # TEST
-

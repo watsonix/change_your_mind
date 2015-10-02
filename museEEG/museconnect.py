@@ -91,7 +91,6 @@ class MuseConnect(object):
         self.connected = True
         # self.oscServer.serve_forever()
         t = threading.Thread(target=self.oscServer.serve_forever)
-        print("test")
         t.daemon = True
         t.start()
         print("Started Muse OSC reader")
@@ -142,10 +141,11 @@ class MuseConnect(object):
         updated at 1 Hz
         """
         self.vprint("touchingforehead: {}".format(touchingforehead))
+        ##print("touchingforehead: {}".format(touchingforehead))
         curtime = time.time()
-        # if len(self.touchingforehead) == 0 or self.touchingforehead[-1][1] != touchingforehead:
-        #     self._contactTransTime = curtime
-        # self.touchingforehead.extend((curtime, touchingforehead))
+        if self.onForehead != touchingforehead:
+            self._contactTransTime = curtime
+            print("forehead contact changed state!")
         self.onForehead = touchingforehead
         self.sec_since_last_forehead_trans = curtime - self._contactTransTime
 
@@ -154,11 +154,11 @@ class MuseConnect(object):
         status indicator for each of the Muse channels
         1 = good, 2 = ok, >=3 bad
         """
-        horseshoe = [ch1, ch2, ch3, ch4]
+        horseshoe = list(map(int, [ch1, ch2, ch3, ch4]))  # convert to ints, cause thats what we expect
         self.vprint("horseshoe: {}".format(horseshoe))
         # element = (self.timestamp(ts, tsms), horseshoe)
         self.horseshoe.append(horseshoe)
-        self.currentSensorState = horseshoe
+        self.curSensorState = horseshoe
 
     def eeg_bandpower_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
@@ -189,7 +189,9 @@ class MuseConnect(object):
         the specific function used in Change Your Mind to get
         the absolute alpha power
         """
-        return self.popAll("alpha_absolute")
+        alpha_buffer = self.popAll("alpha_absolute")
+        print("popping {} alpha values".format(len(alpha_buffer)))
+        return alpha_buffer
 
     def is_on_forehead(self):
         return self.onForehead
@@ -218,15 +220,15 @@ if __name__ == "__main__":
                         help="The port to listen on")
     args = parser.parse_args()
 
-    muse = MuseConnect(args.ip, args.port)
+    muse = MuseConnect(args.ip, args.port, verbose=True)
 
-    muse.start()  # this is a blocking call!!! wtf!!!??
+    muse.start()
 
-    # ## this doesnt actually do anything
-    # try :
-    #     while 1 :
-    #         time.sleep(1)
+    # catch the kill stroke
+    try :
+        while 1 :
+            time.sleep(1)
 
-    # except KeyboardInterrupt :
-    #     print("\nClosing OSCServer.")
-    #     muse.shutdown()
+    except KeyboardInterrupt :
+        print("\nClosing OSCServer.")
+        muse.shutdown()
