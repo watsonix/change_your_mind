@@ -81,16 +81,17 @@ class ChangeYourBrainStateControl(object):
         'tag out' currently means transition from muse on forehead to off and vice versa
         """
         if self.tag_time: #if already tagged in, check for tag out
-            print('last tagged in. checking for tag out')
+            # print('last tagged in. checking for tag out')
             if (not self.eeg.is_on_forehead() and 
                 self.eeg.get_sec_since_last_forehead_trans() > forehead_tag_out_time):
                 self.tag_time = None
+                print(">>>>> TAGGED OUT")
         else: #check for tag in
-            print('last tagged out. checking for tag in')
+            # print('last tagged out. checking for tag in')
             if (self.eeg.is_on_forehead() and 
                 self.eeg.get_sec_since_last_forehead_trans() > forehead_tag_in_time):
-                self.tag_in()            
-
+                self.tag_in()
+                print(">>>>> TAGGED IN")
 
     ######################################################
     # ## STATE CHANGING ############
@@ -387,7 +388,7 @@ class ChangeYourBrainStateControl(object):
             count = 0
             while True:
                 count += 1
-                yield t + count * period - time.time()
+                yield max(0, t + count * period - time.time())
         g = g_tick()
         while self.experiment_state == state:
             self.check_eeg_lead()   

@@ -45,17 +45,17 @@ class MuseConnect(object):
         self.oscDispatcher.map("/muse/elements/touching_forehead", self.touchingforehead_handler, "touchingforehead")
         self.oscDispatcher.map("/muse/elements/horseshoe", self.horseshoe_handler, "horseshoe")
 
-        self.oscDispatcher.map("/muse/elements/delta_absolute", self.eeg_bandpower_handler, "delta_absolute")
-        self.oscDispatcher.map("/muse/elements/theta_absolute", self.eeg_bandpower_handler, "theta_absolute")
+        # self.oscDispatcher.map("/muse/elements/delta_absolute", self.eeg_bandpower_handler, "delta_absolute")
+        # self.oscDispatcher.map("/muse/elements/theta_absolute", self.eeg_bandpower_handler, "theta_absolute")
         self.oscDispatcher.map("/muse/elements/alpha_absolute", self.eeg_bandpower_handler, "alpha_absolute")
-        self.oscDispatcher.map("/muse/elements/beta_absolute", self.eeg_bandpower_handler, "beta_absolute")
-        self.oscDispatcher.map("/muse/elements/gamma_absolute", self.eeg_bandpower_handler, "gamma_absolute")
+        # self.oscDispatcher.map("/muse/elements/beta_absolute", self.eeg_bandpower_handler, "beta_absolute")
+        # self.oscDispatcher.map("/muse/elements/gamma_absolute", self.eeg_bandpower_handler, "gamma_absolute")
 
-        self.oscDispatcher.map("/muse/elements/delta_relative", self.eeg_bandpower_handler, "delta_relative")
-        self.oscDispatcher.map("/muse/elements/theta_relative", self.eeg_bandpower_handler, "theta_relative")
-        self.oscDispatcher.map("/muse/elements/alpha_relative", self.eeg_bandpower_handler, "alpha_relative")
-        self.oscDispatcher.map("/muse/elements/beta_relative", self.eeg_bandpower_handler, "beta_relative")
-        self.oscDispatcher.map("/muse/elements/gamma_relative", self.eeg_bandpower_handler, "gamma_relative")
+        # self.oscDispatcher.map("/muse/elements/delta_relative", self.eeg_bandpower_handler, "delta_relative")
+        # self.oscDispatcher.map("/muse/elements/theta_relative", self.eeg_bandpower_handler, "theta_relative")
+        # self.oscDispatcher.map("/muse/elements/alpha_relative", self.eeg_bandpower_handler, "alpha_relative")
+        # self.oscDispatcher.map("/muse/elements/beta_relative", self.eeg_bandpower_handler, "beta_relative")
+        # self.oscDispatcher.map("/muse/elements/gamma_relative", self.eeg_bandpower_handler, "gamma_relative")
 
         # each of these should be an empty queue,
         # where each element holds a tuple of (timestamp, value)
@@ -107,7 +107,7 @@ class MuseConnect(object):
         verbose print, only if verbose is on
         """
         if self.verbose:
-            print(value)
+            print(value, flush=True)
 
     def _timestamp(self, ts, tsms):
         """
@@ -141,11 +141,11 @@ class MuseConnect(object):
         updated at 1 Hz
         """
         self.vprint("touchingforehead: {}".format(touchingforehead))
-        ##print("touchingforehead: {}".format(touchingforehead))
+        # print("touchingforehead: {}".format(touchingforehead), flush=True)
         curtime = time.time()
         if self.onForehead != touchingforehead:
+            print("forehead contact changed state! {} to {}".format(self.onForehead, touchingforehead), flush=True)
             self._contactTransTime = curtime
-            print("forehead contact changed state!")
         self.onForehead = touchingforehead
         self.sec_since_last_forehead_trans = curtime - self._contactTransTime
 
@@ -156,6 +156,7 @@ class MuseConnect(object):
         """
         horseshoe = list(map(int, [ch1, ch2, ch3, ch4]))  # convert to ints, cause thats what we expect
         self.vprint("horseshoe: {}".format(horseshoe))
+        # print("horseshoe: {}".format(horseshoe), flush=True)
         # element = (self.timestamp(ts, tsms), horseshoe)
         self.horseshoe.append(horseshoe)
         self.curSensorState = horseshoe
@@ -164,11 +165,14 @@ class MuseConnect(object):
         """
         uses class attributes to append values to the correct attribute queue
         """
+        attr = self.__getattribute__(name[0])
         values = [ch1, ch2, ch3, ch4]
         out = self._averageFront(values)
-        self.vprint("{}: {}".format(name[0], out))
-        attr = self.__getattribute__(name[0])
+        # print("{}: {}, queuelen={}".format(name[0], out, len(attr)), flush=True)
+        self.vprint("{}: {}, queuelen={}".format(name[0], out, len(attr)))
         attr.append(out)
+        if len(attr) > 30:
+            print("{} pop: {}".format(name[0], self.popAll(name[0])))
 
     def popAll(self, name):
         """
@@ -189,8 +193,10 @@ class MuseConnect(object):
         the specific function used in Change Your Mind to get
         the absolute alpha power
         """
+        if not self.alpha_absolute:
+            print("nothing in alpha", flush=True)
         alpha_buffer = self.popAll("alpha_absolute")
-        print("popping {} alpha values".format(len(alpha_buffer)))
+        print("popping {} alpha values".format(len(alpha_buffer)), flush=True)
         return alpha_buffer
 
     def is_on_forehead(self):

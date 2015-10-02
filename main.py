@@ -2,7 +2,6 @@ import sys
 import random
 from os.path import abspath
 # sys.path.insert(0, abspath(".."))
-sys.path.insert(0, abspath("cloudbrain-master"))
 import json
 import time
 from websocket import create_connection
@@ -13,11 +12,11 @@ from ecg.neurosky_ecg import NeuroskyECG
 import serial
 from museEEG.museconnect import MuseConnect
 
-# eeg_source = "real"  # fake or real
-eeg_source = "fake"  # fake or real
+eeg_source = "real"  # fake or real
+# eeg_source = "fake"  # fake or real
 
-# ecg_source = "real"  # fake or real
-ecg_source = "fake"  # fake or real
+ecg_source = "real"  # fake or real
+# ecg_source = "fake"  # fake or real
 
 # timing = "live"  # for full timing as in exploratorium visitor mode
 timing = "debug"  # for quick debug timing
@@ -212,7 +211,7 @@ if __name__ == "__main__":
         ecg = ecg_fake()
 
     if (eeg_source == 'real'):
-        eeg = MuseConnect(verbose=False)
+        eeg = MuseConnect(verbose=True)
         eeg.start()
     else:
         eeg = eeg_fake()
