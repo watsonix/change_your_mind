@@ -86,11 +86,11 @@ class ecg_fake():  # FAKE HEART
         self.lead_count += 1
         if self.lead_count > 5:
             self.cur_lead_on = True
-            # print('lead on')
+            # print('ecg lead on')
             return True
         else:
             self.cur_lead_on = False
-            # print('lead off')
+            # print('ecg lead off')
             return False
 
     def get_hrv(self):

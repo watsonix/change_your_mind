@@ -420,7 +420,11 @@ class ChangeYourBrainStateControl(object):
         # construct the message to send all 4 sensor states and parse it
         if self.eeg.curSensorState != self.eegSensorState:
             self.eegSensorState = self.eeg.curSensorState
-            # TODO: update the sensor values and send message with new values
+            instruction = {"message": {
+                    "value": {'instruction_name': 'EEG_SENSOR', 'sensorstate': self.eegSensorState},
+                    "type": "string", "name": "instruction", "clientName": self.client_name}}
+            print("Muse headset sensorstate", self.eegSensorState)
+            self.sb_server.ws.send(json.dumps(instruction))
 
     def check_ecg_lead(self):
         """ check to see the current state of the ECG lead, and send a message if it changes """

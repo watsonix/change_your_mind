@@ -24,21 +24,24 @@
             <header class="page-header">
                 <div class="navbar">
                     <div class="logo pull-left">
-                        <h2><a href="index.html">Change Your Mind</strong></a> <small>0.3</small></h2>
+                        <h2><a href="index.html">Change Your Mind</strong></a> <small>0.4</small></h2>
                     </div>
                     <ul class="nav navbar-nav navbar-right pull-right">
                         <li class="connection">
-                            <div class="eeg-indicator">
-                                <i class="fa fa-circle text-success"></i>
-                            </div>
-                            <span class="label-name" id="eeg_state">EEG: Connected</span>
-                        </li>
-                        <li class="connection">
                             <div class="ecg-indicator">
-                                <i class="fa fa-circle text-success"></i>
+                                <i class="fa fa-circle text-danger"></i>
                             </div>
                             <span class="label-name" id="ecg_state">ECG: Not Connected</span>
                         </li>
+                        <li class="sensor"><div class="eeg-sensor1"> <i class="fa fa-circle text-muted"></i></div></li>
+                        <li class="sensor"><div class="eeg-sensor2"> <i class="fa fa-circle text-muted"></i></div></li>
+                        <li class="sensor"><div class="eeg-sensor3"> <i class="fa fa-circle text-muted"></i></div></li>
+                        <li class="sensor"><div class="eeg-sensor4"> <i class="fa fa-circle text-muted"></i></div></li>
+
+                        <li class="connection">
+                            <div class="eeg-indicator"><i class="fa fa-circle text-danger"></i></div>
+                            <span class="label-name" id="eeg_state">EEG: Not Connected</span>
+                            </li>
                     </ul>
                 </div>
             </header>
@@ -50,7 +53,7 @@
                             <header>
                                 <h4>Instructions</h4>
                             </header>
-                            <div id="instructions">Explore how intention can change your mind (alpha brain oscillations, EEG) and body (Heart Rate Variability, ECG).<br/>This experience will take 3 minutes to complete once you have successful connection with the Muse headset.<br/>Please place your hands on  to begin.</div>
+                            <div id="instructions">Explore how intention can change your mind (alpha brain oscillations: EEG) and body (Heart Rate Variability: ECG).<br/>This experience will take 3 minutes to complete once you have successful connection with the Muse headset.<br/>Please place your hands on  to begin.</div>
                         </section>
                     </div>
                 </div>
@@ -212,12 +215,14 @@
             var ecg_disconnected_text = "ECG: Not Connected";
             var eeg_connected_text = "EEG: Connected";
             var ecg_connected_text = "ECG: Connected";
-            var not_started_text = "Please tap your RFID tag to begin.";
+            var not_started_text = "Please put on the Muse headset to begin.";
             // initialize program variables
             var eeg_state = "DISCONNECTED";
             var ecg_state = "DISCONNECTED";
             var indicator_connected = '<i class="fa fa-circle text-success"></i>';
             var indicator_disconnected = '<i class="fa fa-circle text-danger"></i>';
+            var indicator_connectedok = '<i class="fa fa-circle text-warning"></i>';
+            var indicator_connectedbad = '<i class="fa fa-circle text-muted"></i>';
             var eeg_buffer = [];
             var ecg_buffer = [];
             var baseline_eeg_buffer = [];
@@ -365,10 +370,14 @@ function setup (){
 */
 function onOpen() {
     console.log("spacebrew client connection opened")
-    $("#eeg_state").html( eeg_connected_text );
+    $("#eeg_state").html( eeg_disconnected_text );
     $("#ecg_state").html( ecg_disconnected_text );
-    $('.eeg-indicator').html(indicator_connected);
-    $('.ecg-indicator').html(indicator_connected);
+    $('.eeg-indicator').html(indicator_disconnected);
+    $('.eeg-sensor1').html(indicator_connectedbad);
+    $('.eeg-sensor2').html(indicator_connectedbad);
+    $('.eeg-sensor3').html(indicator_connectedbad);
+    $('.eeg-sensor4').html(indicator_connectedbad);
+    $('.ecg-indicator').html(indicator_disconnected);
 }
 
 function onClose() {
@@ -377,6 +386,10 @@ function onClose() {
     $("#ecg_state").html( ecg_disconnected_text );
     //$("#message").html( message );
     $('.eeg-indicator').html(indicator_disconnected);
+    $('.eeg-sensor1').html(indicator_connectedbad);
+    $('.eeg-sensor2').html(indicator_connectedbad);
+    $('.eeg-sensor3').html(indicator_connectedbad);
+    $('.eeg-sensor4').html(indicator_connectedbad);
     $('.eeg-indicator').html(indicator_disconnected);
 }
 /**
@@ -520,33 +533,51 @@ function update_ui(instruction)
 
 
     }
+    else if (instruction.instruction_name == "EEG_SENSOR") {
+        for (i=0; i<4; i++) {
+            var n = instruction.sensorstate[i]
+            var ns = n.toString()
+            var name = ".eeg_sensor"
+            name = name.concat(ns)
+            if (n==1) {
+                $(name).html(indicator_connected)
+            }
+            else if (n==2) {
+                $(name).html(indicator_connectedok)
+            }
+            else {
+                $(name).html(indicator_connectedbad)   
+            }
+        }
+    }
     else if (instruction.instruction_name == "CONNECTED")
     {
-	   if (instruction.type == "eeg"){
-		  $("#eeg_state").html( eeg_connected_text );
-          $('.eeg-indicator').html(indicator_connected);
-	   }
-	else if (instruction.type == "ecg")
-	{
-		$("#ecg_state").html( ecg_connected_text );
-        $('.ecg-indicator').html(indicator_connected);
-	}
+	    if (instruction.type == "eeg"){
+		    $("#eeg_state").html( eeg_connected_text );
+            $('.eeg-indicator').html(indicator_connected);
+	    }
+    	else if (instruction.type == "ecg")
+    	{
+    		$("#ecg_state").html( ecg_connected_text );
+            $('.ecg-indicator').html(indicator_connected);
+    	}
+    }
+
+    else if (instruction.instruction_name == "DISCONNECTED")
+    {
+    	if (instruction.type == "eeg"){
+    		$("#eeg_state").html( eeg_disconnected_text );
+            $('.eeg-indicator').html(indicator_disconnected);
+    	}
+    	else if (instruction.type == "ecg")
+    	{
+    		$("#ecg_state").html( ecg_disconnected_text );
+            $('.ecg-indicator').html(indicator_disconnected);
+    	}
+
+    }
 }
 
-else if (instruction.instruction_name == "DISCONNECTED")
-{
-	if (instruction.type == "eeg"){
-		$("#eeg_state").html( eeg_disconnected_text );
-        $('.eeg-indicator').html(indicator_disconnected);
-	}
-	else if (instruction.type == "ecg")
-	{
-		$("#ecg_state").html( ecg_disconnected_text );
-        $('.ecg-indicator').html(indicator_disconnected);
-	}
-
-}
-}
 
 function start_baseline_timer(seconds)
 {
