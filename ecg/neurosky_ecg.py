@@ -19,7 +19,7 @@ import sys
 import time
 import serial
 from queue import Queue
-
+import os, inspect  # for dynamically checking for library file location
 
 SYNC_BYTE = 0xAA  # NOTE: this used to be 0x77!!! change this in the documentation
 EXCODE_BYTE = 0x55
@@ -245,14 +245,20 @@ class NeuroskyECG(object):
 
     def _ecgInitAlgLib(self, libname='TgEcgAlg64.dll', power_frequency=60):
         """ initialize the TgEcg algorithm dll """
-
+        curFN = inspect.getfile(inspect.currentframe())
+        curFN = curFN.split("/")
+        if len(curFN) != 1:
+            libRoot = "/".join(curFN[:-1]) + "/"
+            print("library dir: ", libRoot)
+        else:
+            libRoot = ""
         if sys.maxsize > (2 ** 32) / 2 - 1:  # running 64 bit
             print("loading Neurosky tg_ecg library, 64 bit")
-            libname = 'TgEcgAlg64.dll'
+            libname = libRoot + "TgEcgAlg64.dll"
         else:
             print("loading Neurosky tg_ecg library, 32 bit")
             # libname = 'TgEcgAlg.dll'
-            libname = 'tg_ecg.so'
+            libname = libRoot + "tg_ecg.so"
         print("loading analysis library: ", libname)
         E = cdll.LoadLibrary(libname)
 
@@ -328,7 +334,7 @@ if __name__ == "__main__":
     # https://github.com/matplotlib/matplotlib/issues/3505
     sys.ps1 = 'IAMAHACK'
 
-    target_port = 'COM12'  # production windows box
+    target_port = 'COM7'  # production windows box
     # target_port = 'COM8' #mike's laptop
 
     plot_fig = True
