@@ -9,6 +9,7 @@ date: 2015.09.30
 
 import argparse
 import threading
+import time
 
 from collections import deque
 
@@ -62,6 +63,8 @@ class MuseConnect(object):
         self.battery = deque()
         self.touchingforehead = deque()
         self.onForehead = None
+        self.secondsSinceLastForeheadContactTransition = 0  # the time delta since the last time the forehead contact changed state
+        self._contactTransTime = 0  # the time that we observed the transition of contact state
         self.horseshoe = deque()
         self.currentSensorState = None  # hold just the most recent value from horseshoe
 
@@ -136,11 +139,15 @@ class MuseConnect(object):
     def touchingforehead_handler(self, address, name, touchingforehead):
         """
         returns value 1 if touching forehead, 0 if not
-        updated at 10 Hz
+        updated at 1 Hz
         """
         self.vprint("touchingforehead: {}".format(touchingforehead))
-        self.touchingforehead.append(touchingforehead)
+        curtime = time.time()
+        if self.touchingforehead[-1][1] != touchingforehead:
+            self._contactTransTime = curtime
+        self.touchingforehead.append((curtime, touchingforehead))
         self.onForehead = touchingforehead
+        self.secondsSinceLastForeheadContactTransition = curtime - self._contactTransTime
 
     def horseshoe_handler(self, address, name, ch1, ch2, ch3, ch4):
         """
