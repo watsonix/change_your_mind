@@ -80,7 +80,7 @@ class ChangeYourBrainStateControl(object):
         # devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
         self.set_state(SETUP_INSTRUCTIONS)
         self.output_instruction()
-        self.do_every_while(self.vis_period, SETUP_INSTRUCTIONS, self.start_on_lead) #start as soon as we see ECG lead on
+        self.do_every_while(self.vis_period, SETUP_INSTRUCTIONS, self.start_on_ecg_lead) #start as soon as we see ECG lead on
 
     def start_baseline_instructions(self):
         if self.experiment_state not in [SETUP_INSTRUCTIONS,BASELINE_CONFIRMATION]:
@@ -370,7 +370,7 @@ class ChangeYourBrainStateControl(object):
             self.check_ecg_lead()  # check the ECG lead here
             f(*args)
 
-    def start_on_lead(self):
+    def start_on_ecg_lead(self):
         if self.ecg.is_lead_on():
             self.check_ecg_lead()  # should turn on ECG cconnection
             self.start_baseline_instructions()  # and then start the state engine
