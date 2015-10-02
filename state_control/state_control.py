@@ -51,7 +51,7 @@ class ChangeYourBrainStateControl(object):
         self.alpha_buffer = []  # buffering eeg alpha freq
         self.poll_answer = False  # temp holding of subjective rating
         self.ecg_leadon = False  # start with lead off as current state
-        self.eeg_leadon = False  # will track eeg.touchingforehead
+        self.eeg_leadon = False  # will track eeg.onForehead
         self.eegSensorState = [4, 4, 4, 4]  # start with all off
         self.filename_prepend = "transtech_cym"
         self.meta_data = {'time': [], 'value':[]} #program state etc

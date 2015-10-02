@@ -80,6 +80,11 @@ class MuseConnect(object):
         self.beta_relative = deque()
         self.gamma_relative = deque()
 
+        self.outfn = "museoutput.dat"
+        f=open(self.outfn,"w")  # initialize file
+        f.write("")
+        self.outcounter = 0
+
         # self.oscServer = osc_server.ForkingOSCUDPServer((ipAddress, port), self.oscDispatcher)
         self.oscServer = osc_server.ThreadingOSCUDPServer((ipAddress, port), self.oscDispatcher)
         self.oscServer.daemon = True
@@ -121,6 +126,19 @@ class MuseConnect(object):
         average the front sensor values
         """
         return (channelValues[1] + channelValues[2]) / 2.
+
+    def write2file(self):
+        """
+        write specific format to file
+        index,onForehead,sec_since_last_forehead_trans,sens1,sens2,sens3,sens4,alpha_absolute
+        """
+        with open(self.outfn,"a") as f:
+            self.outcounter += 1
+            outstr = str(self.outcounter) + "," + str(self.onForehead) + "," + str(self.sec_since_last_forehead_trans)
+            for i in range(4):
+                outstr += "," + str(self.curSensorState[i])
+            outstr += "," + str(self.pop("alpha_absolute")) + "\n"
+            f.write(outstr)
 
     def battery_handler(self, address, name, chargePercent, fuelgaugeBattVolt, ADCBattVolt, temperature, ts, tsms):
         """
@@ -174,6 +192,8 @@ class MuseConnect(object):
         attr.append(out)
         if len(attr) > 30:
             print("{} pop: {}".format(name[0], self.popAll(name[0])))
+        if name[0] == "alpha_absolute":
+            self.write2file()
 
     def popAll(self, name):
         """
@@ -235,7 +255,7 @@ if __name__ == "__main__":
     try :
         while 1 :
             time.sleep(1)
-            print(muse.get_alpha())
+            # print(muse.get_alpha())
 
     except KeyboardInterrupt :
         print("\nClosing OSCServer.")

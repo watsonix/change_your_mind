@@ -75,6 +75,42 @@ class eeg_fake():  # FAKE BRAIN
     def get_sec_since_last_forehead_trans(self):
         return 4
 
+class eeg_real():
+    """
+    read data from file
+    """
+    self.counter = 0
+
+    self.infn = "museoutput.dat"
+    self.fileposition =0  # in bytes
+    self.alpha = 0
+    self.onForehead = 0
+    self.curSensorState = [4, 4, 4, 4]
+    self.dtContact = 0
+
+    def readfile(self):
+        with open(self.infn) as f:
+            f.seek(self.fileposition, 0)  #seek to byte from start
+            line = f.readline()
+            data = line.split(",")
+            print(data)
+            self.counter = int(data[0])
+            self.onForehead = int(data[1])
+            self.dtContact = float(data[2])
+            for i in range(4):
+                self.curSensorState[i] = int(data[3 + i])
+            self.alpha = float(data[8])
+            self.fileposition = f.tell()
+
+    def get_alpha(self):
+        return self.alpha
+
+    def get_sec_since_last_forehead_trans(self):
+        return self.dtContact
+
+    def is_on_forehead(self):
+        return self.onForehead
+
 
 class ecg_fake():  # FAKE HEART
 
@@ -211,8 +247,9 @@ if __name__ == "__main__":
         ecg = ecg_fake()
 
     if (eeg_source == 'real'):
-        eeg = MuseConnect(verbose=True)
-        eeg.start()
+        # eeg = MuseConnect(verbose=True)
+        # eeg.start()
+        eeg = eeg_real()
     else:
         eeg = eeg_fake()
 
