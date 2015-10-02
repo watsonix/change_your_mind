@@ -16,6 +16,8 @@ if sys.platform == 'win32':  # windoze
 forehead_tag_in_time = 3 #second since started touching forehead to tag on
 forehead_tag_out_time = 3 #second since stopped touching forehead to tag ff
 
+setup_inst_period = .75
+
 class ChangeYourBrainStateControl(object):
     """
     Creates the experiment state machine, sending data to the node.js server
@@ -78,7 +80,6 @@ class ChangeYourBrainStateControl(object):
         """
         'tag out' currently means transition from muse on forehead to off and vice versa
         """
-        print('checking tag status')
         if self.tag_time: #if already tagged in, check for tag out
             print('last tagged in. checking for tag out')
             if (not self.eeg.is_on_forehead() and 
@@ -101,7 +102,7 @@ class ChangeYourBrainStateControl(object):
         # devNote: possibly add both time-in and time-out timer here which takes us back to (no experiment)
         self.set_state(SETUP_INSTRUCTIONS)
         self.output_instruction()
-        self.do_every_while(self.vis_period, SETUP_INSTRUCTIONS, self.start_on_ecg_lead) #start as soon as we see ECG lead on
+        self.do_every_while(setup_inst_period, SETUP_INSTRUCTIONS, self.start_on_ecg_lead) #start as soon as we see ECG lead on
 
     def start_baseline_instructions(self):
         if self.experiment_state not in [SETUP_INSTRUCTIONS,BASELINE_CONFIRMATION]:

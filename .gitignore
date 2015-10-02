@@ -3,5 +3,5 @@ __pycache__/
 .DS_Store
 .dat
 data/*
-Spacebrew/data/routes/live/live_persist_config.json
+Spacebrew/data/*
 node_modules/
