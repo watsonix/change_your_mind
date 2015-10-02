@@ -61,12 +61,12 @@ class MuseConnect(object):
         # where each element holds a tuple of (timestamp, value)
         # get all values from the queue with (times, values) = muse.popValue()
         self.battery = deque()
-        self.touchingforehead = deque()
+        # self.touchingforehead = deque()
         self.onForehead = None
         self.secondsSinceLastForeheadContactTransition = 0  # the time delta since the last time the forehead contact changed state
         self._contactTransTime = 0  # the time that we observed the transition of contact state
         self.horseshoe = deque()
-        self.currentSensorState = None  # hold just the most recent value from horseshoe
+        self.curSensorState = None  # hold just the most recent value from horseshoe
 
         self.delta_absolute = deque()
         self.theta_absolute = deque()
@@ -143,9 +143,9 @@ class MuseConnect(object):
         """
         self.vprint("touchingforehead: {}".format(touchingforehead))
         curtime = time.time()
-        if self.touchingforehead[-1][1] != touchingforehead:
-            self._contactTransTime = curtime
-        self.touchingforehead.append((curtime, touchingforehead))
+        # if len(self.touchingforehead) == 0 or self.touchingforehead[-1][1] != touchingforehead:
+        #     self._contactTransTime = curtime
+        # self.touchingforehead.extend((curtime, touchingforehead))
         self.onForehead = touchingforehead
         self.secondsSinceLastForeheadContactTransition = curtime - self._contactTransTime
 

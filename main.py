@@ -16,8 +16,10 @@ from museEEG.museconnect import MuseConnect
 # eeg_source = "real"  # fake or real
 eeg_source = "fake"  # fake or real
 
-ecg_source = "real"  # fake or real
-# ecg_source = "fake"  # fake or real
+ecg_comPort = "COM7"  # windows com port
+# ecg_source = "real"  # fake or real
+ecg_source = "fake"  # fake or real
+
 
 # timing = "live"  # for full timing as in exploratorium visitor mode
 timing = "debug"  # for quick debug timing
@@ -77,11 +79,11 @@ class ecg_fake():  # FAKE HEART
         self.lead_count += 1
         if self.lead_count > 5:
             self.cur_lead_on = True
-            print('lead on')
+            print('ecg lead on')
             return True
         else:
             self.cur_lead_on = False
-            print('lead off')
+            print('ecg lead off')
             return False
 
     def get_hrv(self):
@@ -202,7 +204,6 @@ if __name__ == "__main__":
         ecg = ecg_fake()
 
     if (eeg_source == 'real'):
-        # TODO: MIKES STUFF HERE
         eeg = MuseConnect(verbose=False)
         eeg.start()
     else:
@@ -234,6 +235,7 @@ if __name__ == "__main__":
     print('waiting for tag in')
     # TODO: this will need to be a keyboard tag in. OR ... we could 'tag_out' after 5 seconds of EEG disconnect
     if (eeg_source == 'fake'):
+    # if True:
         time.sleep(4)
         sc.tag_in()
         time.sleep(12)
