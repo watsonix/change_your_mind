@@ -338,7 +338,7 @@ class ChangeYourBrainStateControl(object):
         # save data to file
         # ew, there are better ways to do this time string
         (tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday,tm_yday,tm_isdst) = time.localtime() #get local time
-        filename = '%s_%d.%02d.%02d_%d.%d.%d.dat' % (self.filename_prepend,tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec) 
+        filename = 'data/%s_%d.%02d.%02d_%d.%d.%d.pkl' % (self.filename_prepend,tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec) 
         output_dict = {
             'metadata': self.meta_data,
             'hrv baseline': self.hrv_save_baseline,
@@ -398,7 +398,7 @@ class ChangeYourBrainStateControl(object):
         # construct the message to send all 4 sensor states and parse it
         if self.eeg.curSensorState != self.eegSensorState:
             self.eegSensorState = self.eeg.curSensorState
-            # update the sensor values and send message with new values
+            # TODO: update the sensor values and send message with new values
 
     def check_ecg_lead(self):
         """ check to see the current state of the ECG lead, and send a message if it changes """
