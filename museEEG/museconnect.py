@@ -158,7 +158,7 @@ class MuseConnect(object):
         self.vprint("horseshoe: {}".format(horseshoe))
         # print("horseshoe: {}".format(horseshoe), flush=True)
         # element = (self.timestamp(ts, tsms), horseshoe)
-        self.horseshoe.append(horseshoe)
+        # self.horseshoe.append(horseshoe)
         self.curSensorState = horseshoe
 
     def eeg_bandpower_handler(self, address, name, ch1, ch2, ch3, ch4):
@@ -234,6 +234,7 @@ if __name__ == "__main__":
     try :
         while 1 :
             time.sleep(1)
+            print(muse.get_alpha())
 
     except KeyboardInterrupt :
         print("\nClosing OSCServer.")
